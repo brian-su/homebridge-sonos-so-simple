@@ -2,7 +2,7 @@
 
 ## What does it do?
 
-If, like me, you've bought a Sonos soundbar (Beam/Arc) and just want to expose a few settings to Homekit to control via Siri this is the package for you!
+If, like me, you've bought a Sonos soundbar (Beam/Arc) and just want to expose a few settings to Homekit to control via Siri then this is the package for you!
 
 This package gives you options to control the volume, mute, speech enhancement and night mode via Homebridge with very little config setup.
 
