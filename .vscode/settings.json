@@ -1,8 +1,5 @@
 {
     "files.eol": "\n",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
     "editor.rulers": [140],
     "cSpell.words": ["Sonos"]
 }
