@@ -1,16 +1,25 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
-  "pluginType": "platform",
-  "singular": true,
-  "schema": {
-    "type": "object",
-    "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
-      }
+    "pluginAlias": "SonosSoSimplePlatform",
+    "pluginType": "platform",
+    "singular": true,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "muteSwitch": {
+                "title": "Separate Switch For Mute?",
+                "type": "boolean"
+            },
+            "volume": {
+                "title": "Volume Options",
+                "type": "string",
+                "default": "none",
+                "oneOf": [
+                    { "title": "None", "enum": ["none"] },
+                    { "title": "Lightbulb", "enum": ["bulb"] },
+                    { "title": "Fan", "enum": ["fan"] }
+                ],
+                "required": true
+            }
+        }
     }
-  }
 }
