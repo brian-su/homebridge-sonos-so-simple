@@ -48,13 +48,13 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         sonosDevices
             .discover()
             .then((device) => {
-                this.log.info(`Device : ${JSON.stringify(device)}`);
+                this.log.debug(`Device : ${JSON.stringify(device)}`);
 
                 devicePromises.push(
                     device.deviceDescription().then((description) => {
                         const uuid = this.api.hap.uuid.generate(description.MACAddress);
                         foundDevices.push(uuid);
-                        this.log.info(`UUID is : ${uuid}`);
+                        this.log.debug(`Found device - UUID is : ${uuid}`);
                         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
                         if (existingAccessory) {
@@ -74,39 +74,13 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             })
             .then(() => {
                 Promise.all(devicePromises).then(() => {
-                    this.log.info('Got Devices');
-                    this.log.info(`Sonos found the following: ${JSON.stringify(foundDevices)}`);
+                    this.log.info('Got All Devices');
+                    this.log.debug(`Sonos found the following: ${JSON.stringify(foundDevices)}`);
                     const removedAccessories = this.accessories.filter((accessory) => foundDevices.indexOf(accessory.UUID) === -1);
                     removedAccessories.forEach((accessory) => this.log.info(`Removing ${accessory.context.device.host}`));
-                    this.log.info(`Now removing the following ${removedAccessories.map((x) => x.UUID)}`);
+                    this.log.debug(`Now removing the following ${removedAccessories.map((x) => x.UUID)}`);
                     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
                 });
             });
-
-        // DeviceDiscovery((device) => {
-        //     device.deviceDescription().then((desc) => {
-        //         const uuid = this.api.hap.uuid.generate(desc.MACAddress);
-        //         foundDevices.push(uuid);
-        //         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
-
-        //         if (existingAccessory) {
-        //             this.log.info(`Adding ${desc.displayName} from cache`);
-        //             new SonosPlatformAccessory(this, existingAccessory);
-        //             this.api.updatePlatformAccessories([existingAccessory]);
-        //             return;
-        //         }
-
-        //         this.log.info(`Adding ${desc.displayName} as new device`);
-        //         const accessory = new this.api.platformAccessory(desc.displayName, uuid);
-        //         accessory.context.device = device;
-        //         new SonosPlatformAccessory(this, accessory);
-        //         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-        //     });
-        // });
-        // this.log.info(`Sonos found the following: ${JSON.stringify(foundDevices)}`);
-        // const removedAccessories = this.accessories.filter((accessory) => foundDevices.indexOf(accessory.UUID) === -1);
-        // removedAccessories.forEach((accessory) => this.log.info(`Removing ${accessory.context.device.host}`));
-        // this.log.info(`Now removing the following ${removedAccessories.map((x) => x.UUID)}`);
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 }

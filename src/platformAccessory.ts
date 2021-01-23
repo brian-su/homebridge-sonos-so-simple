@@ -39,8 +39,7 @@ export class SonosPlatformAccessory {
                 this.volumeBulbSetup();
                 break;
             case Volume.None:
-                this.platform.log.info('Removing volume options');
-
+                this.platform.log.info('No Volume Options Chosen');
                 break;
         }
 
@@ -108,7 +107,7 @@ export class SonosPlatformAccessory {
      * Handle requests to get the current value of the "Mute" characteristic
      */
     handleMuteBFGet(callback: CharacteristicGetCallback) {
-        this.platform.log.info('Triggered GET Mute');
+        this.platform.log.debug('Triggered GET Mute');
         this.sonosDevice.getMuted().then((mute) => {
             callback(null, !mute);
         });
@@ -118,7 +117,7 @@ export class SonosPlatformAccessory {
      * Handle requests to set the "Mute" characteristic
      */
     handleMuteBFSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.info('Triggered SET Mute:', !value);
+        this.platform.log.debug('Triggered SET Mute:', !value);
         this.sonosDevice.setMuted(!value);
         callback(null);
     }
@@ -128,7 +127,7 @@ export class SonosPlatformAccessory {
      */
     handleMuteSwitchGet(callback: CharacteristicGetCallback) {
         this.sonosDevice.getMuted().then((mute) => {
-            this.platform.log.info(`Triggered GET Mute switch: ${mute}`);
+            this.platform.log.debug(`Triggered GET Mute switch: ${mute}`);
             callback(null, mute);
         });
     }
@@ -137,7 +136,7 @@ export class SonosPlatformAccessory {
      * Handle requests to set the "Mute" characteristic
      */
     handleMuteSwitchSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.info('Triggered SET Mute switch:', value);
+        this.platform.log.debug('Triggered SET Mute switch:', value);
         this.sonosDevice.setMuted(value);
         callback(null);
     }
@@ -146,10 +145,10 @@ export class SonosPlatformAccessory {
      * Handle requests to get the current value of the "Volume" characteristic
      */
     handleVolumeGet(callback: CharacteristicGetCallback) {
-        this.platform.log.info('Triggered GET Volume');
+        this.platform.log.debug('Triggered GET Volume');
 
         this.sonosDevice.getVolume().then((volume) => {
-            this.platform.log.info(volume);
+            this.platform.log.debug(volume);
             callback(null, volume);
         });
     }
@@ -158,7 +157,7 @@ export class SonosPlatformAccessory {
      * Handle requests to set the "Volume" characteristic
      */
     handleVolumeSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.info('Triggered SET Volume:', value);
+        this.platform.log.debug('Triggered SET Volume:', value);
         this.sonosDevice.setVolume(value);
         callback(null);
     }
