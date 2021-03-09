@@ -74,6 +74,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
             if (existingAccessory) {
+                this.log.info(`Adding ${description.displayName} from cache`);
+                new SonosPlatformAccessory(this, existingAccessory);
+                this.api.updatePlatformAccessories([existingAccessory]);
                 return;
             }
 
