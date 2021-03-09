@@ -9,6 +9,11 @@
                 "title": "Separate Switch For Mute?",
                 "type": "boolean"
             },
+            "soundbarsOnly": {
+                "title": "Only offer controls for Beam and Arc",
+                "type": "boolean",
+                "default": true
+            },
             "volume": {
                 "title": "Volume Options",
                 "type": "string",
