@@ -21,7 +21,6 @@
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",
         "prepublishOnly": "npm run build",
-        //This no work
         "localDev": "npm run build && npm link && homebridge -D",
         "trackDev": "npm run watch"
     },
