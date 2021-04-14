@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.1.2 - 2021-04-14
+
+### Features:
+
+Adding support for the Playbar.
+
 ## 0.1.1 - 2021-03-09
 
 ### Bug Fixes:

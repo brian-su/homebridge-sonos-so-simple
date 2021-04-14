@@ -10,7 +10,7 @@
                 "type": "boolean"
             },
             "soundbarsOnly": {
-                "title": "Only offer controls for Beam and Arc",
+                "title": "Only offer controls for soundbars (Beam, Arc, Playbar)",
                 "type": "boolean",
                 "default": true
             },
