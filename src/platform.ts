@@ -13,7 +13,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
-    private readonly soundbars = ['BEAM', 'ARC'];
+    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR'];
     private foundDevices: string[] = [];
     private devicePromises: Promise<null>[] = [];
 
