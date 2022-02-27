@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.1.3 - 2022-02-27
+
+### Features:
+
+Adding support for the ARC SL.
+Allowing users to change display names to the room name instead of the device name via config toggle.
+
 ## 0.1.2 - 2021-04-14
 
 ### Features:
