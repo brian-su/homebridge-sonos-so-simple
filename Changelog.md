@@ -1,5 +1,7 @@
 # Change Log
 
+Changes to the repo are noted here:
+
 ## 0.1.3 - 2022-02-27
 
 ### Features:
