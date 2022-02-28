@@ -13,7 +13,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
-    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR'];
+    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL'];
     private foundDevices: string[] = [];
     private devicePromises: Promise<null>[] = [];
 
@@ -63,6 +63,8 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
     registerDiscoveredDevices(device: any): Promise<null> {
         return device.deviceDescription().then((description) => {
+            var deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
+
             if (this.config.soundbarsOnly) {
                 let name = description.displayName.toUpperCase();
                 if (!this.soundbars.includes(name)) return;
@@ -74,14 +76,15 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
             if (existingAccessory) {
-                this.log.info(`Adding ${description.displayName} from cache`);
+                this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
+                existingAccessory.displayName = deviceDisplayName;
                 new SonosPlatformAccessory(this, existingAccessory);
                 this.api.updatePlatformAccessories([existingAccessory]);
                 return;
             }
 
-            this.log.info(`Adding ${description.displayName} as new device`);
-            const accessory = new this.api.platformAccessory(description.displayName, uuid);
+            this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
+            const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
             accessory.context.device = device;
             new SonosPlatformAccessory(this, accessory);
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
