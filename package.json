@@ -12,7 +12,7 @@
         "url": "https://github.com/brian-su/homebridge-sonos-so-simple/issues"
     },
     "engines": {
-        "node": ">=10.17.0",
+        "node": ">=12.22.7",
         "homebridge": ">=1.0.0"
     },
     "main": "dist/index.js",
