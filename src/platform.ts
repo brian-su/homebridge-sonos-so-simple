@@ -2,6 +2,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { DeviceDetails, FoundDevices, PLATFORM_NAME, PLUGIN_NAME } from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
+import { Device } from './@types/sonos-types';
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -46,7 +47,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.info('Getting Devices');
         let asyncDiscovery = new AsyncDeviceDiscovery();
 
-        let sonosDevices = await asyncDiscovery.discoverMultiple();
+        let sonosDevices: Device[] = await asyncDiscovery.discoverMultiple();
 
         this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
 
@@ -57,13 +58,12 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.removeDevicesNotDiscovered();
     }
 
-    async registerDiscoveredDevices(device: any) {
+    async registerDiscoveredDevices(device: Device) {
         if (!this.coordinators.includes(device.host)) return;
 
         let description = await device.deviceDescription();
-
-        //TODO: tidy this
-        let IsSoundBar = this.soundbars.includes(description.displayName.toUpperCase());
+        let displayNameUpperCase = description.displayName.toUpperCase();
+        let IsSoundBar = this.soundbars.includes(displayNameUpperCase);
 
         if (this.config.soundbarsOnly && !IsSoundBar) return;
 
@@ -88,7 +88,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             Host: device.host,
             IsSoundBar: IsSoundBar,
             Manufacturer: description.manufacturer,
-            SerialNumber: device.serialNum,
+            SerialNumber: description.serialNum,
             ModelName: description.modelName,
         } as DeviceDetails;
         new SonosPlatformAccessory(this, accessory);
