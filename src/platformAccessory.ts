@@ -24,8 +24,6 @@ export class SonosPlatformAccessory {
         this.sonosDevice = new Sonos(deviceDetails.Host);
         this.logger = new SonosLogger(deviceDetails.ModelName, this.platform.log);
 
-        this.logger.logError(`Soundbar: ${this.isSoundbar}`);
-
         // set accessory information
         this.accessory
             .getService(this.platform.Service.AccessoryInformation)!
@@ -145,14 +143,14 @@ export class SonosPlatformAccessory {
     async handleMuteSwitchSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
         if (value && !this.isSoundbar) {
             this.previousLevel = await this.sonosDevice.getVolume();
-            this.logger.logError(`${this.previousLevel}`);
+            this.logger.logDebug(`Setting previous level - ${this.previousLevel}`);
         }
 
         this.logger.logDebug(`Triggered SET Mute switch: ${value}`);
         this.sonosDevice.setMuted(value);
 
         if (!value && !this.isSoundbar && this.previousLevel !== 0) {
-            this.logger.logError(`${this.previousLevel}`);
+            this.logger.logDebug(`Setting volume to previous level - ${this.previousLevel}`);
             this.sonosDevice.setVolume(this.previousLevel);
         }
 
