@@ -1,5 +1,5 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
+import { DeviceDetails, FoundDevices, PLATFORM_NAME, PLUGIN_NAME } from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 /**
@@ -13,9 +13,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
-    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL'];
-    private foundDevices: string[] = [];
-    private devicePromises: Promise<null>[] = [];
+    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
+    private foundDevices: FoundDevices[] = [];
+    private coordinators: string[] = [];
 
     constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -42,63 +42,75 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.accessories.push(accessory);
     }
 
-    discoverDevices() {
+    async discoverDevices() {
         this.log.info('Getting Devices');
-        let sonosDevices = new AsyncDeviceDiscovery();
+        let asyncDiscovery = new AsyncDeviceDiscovery();
 
-        sonosDevices
-            .discoverMultiple()
-            .then((devices) => {
-                this.log.debug(`Device : ${JSON.stringify(devices)}`);
-                devices.forEach((device) => {
-                    this.devicePromises.push(this.registerDiscoveredDevices(device));
-                });
-            })
-            .then(() => {
-                Promise.all(this.devicePromises).then(() => {
-                    this.removeDevicesNotDiscovered();
-                });
-            });
+        let sonosDevices = await asyncDiscovery.discoverMultiple();
+
+        this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
+
+        sonosDevices.forEach(async (device) => {
+            this.registerDiscoveredDevices(device);
+        });
+
+        this.removeDevicesNotDiscovered();
     }
 
-    registerDiscoveredDevices(device: any): Promise<null> {
-        return device.deviceDescription().then((description) => {
-            var deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
+    async registerDiscoveredDevices(device: any) {
+        if (!this.coordinators.includes(device.host)) return;
 
-            if (this.config.soundbarsOnly) {
-                let name = description.displayName.toUpperCase();
-                if (!this.soundbars.includes(name)) return;
-            }
+        let description = await device.deviceDescription();
 
-            const uuid = this.api.hap.uuid.generate(description.MACAddress);
-            this.foundDevices.push(uuid);
-            this.log.debug(`Found device - UUID is : ${uuid}`);
-            const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+        //TODO: tidy this
+        let IsSoundBar = this.soundbars.includes(description.displayName.toUpperCase());
 
-            if (existingAccessory) {
-                this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
-                existingAccessory.displayName = deviceDisplayName;
-                new SonosPlatformAccessory(this, existingAccessory);
-                this.api.updatePlatformAccessories([existingAccessory]);
-                return;
-            }
+        if (this.config.soundbarsOnly && !IsSoundBar) return;
 
-            this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
-            const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
-            accessory.context.device = device;
-            new SonosPlatformAccessory(this, accessory);
-            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-        });
+        let deviceDisplayName = description.displayName;
+
+        const uuid = this.api.hap.uuid.generate(description.MACAddress);
+        this.foundDevices.push({ uuid: uuid, name: deviceDisplayName });
+        this.log.debug(`Found device - UUID is : ${uuid}`);
+        const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+
+        if (existingAccessory) {
+            this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
+            existingAccessory.displayName = deviceDisplayName;
+            new SonosPlatformAccessory(this, existingAccessory);
+            this.api.updatePlatformAccessories([existingAccessory]);
+            return;
+        }
+
+        this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
+        const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
+        accessory.context.device = {
+            Host: device.host,
+            IsSoundBar: IsSoundBar,
+            Manufacturer: description.manufacturer,
+            SerialNumber: device.serialNum,
+            ModelName: description.modelName,
+        } as DeviceDetails;
+        new SonosPlatformAccessory(this, accessory);
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
     removeDevicesNotDiscovered() {
         this.log.info('Got All Devices');
         this.log.debug(`Sonos found the following: ${JSON.stringify(this.foundDevices)}`);
 
-        const removedAccessories = this.accessories.filter((accessory) => this.foundDevices.indexOf(accessory.UUID) === -1);
+        const removedAccessories = this.accessories.filter((accessory) => {
+            return this.foundDevices.map((x) => x.uuid).indexOf(accessory.UUID) === -1;
+        });
         removedAccessories.forEach((accessory) => this.log.info(`Removing ${accessory.context.device.host}`));
 
-        this.log.debug(`Now removing the following ${removedAccessories.map((x) => x.UUID)}`);
+        let removingString = JSON.stringify(
+            removedAccessories.map((x) => {
+                x.UUID, x.displayName;
+            })
+        );
+
+        this.log.debug(`Now removing the following ${removingString}`);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 }

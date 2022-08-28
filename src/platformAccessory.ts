@@ -1,11 +1,12 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
-import { Volume } from './enums';
+import { DeviceDetails, VolumeOptions } from './constants';
+import { SonosLogger } from './SonosLogger';
 
 export class SonosPlatformAccessory {
-    private speechEnhancementService: Service;
-    private nightModeService: Service;
+    private speechEnhancementService: Service | undefined;
+    private nightModeService: Service | undefined;
 
     //User optional
     private volumeBulbService: Service | undefined;
@@ -13,33 +14,39 @@ export class SonosPlatformAccessory {
     private muteService: Service | undefined;
 
     private sonosDevice: Sonos;
+    private isSoundbar: boolean;
+    private previousLevel: number = 0;
+    private logger: SonosLogger;
 
     constructor(private readonly platform: SonosPlatform, private readonly accessory: PlatformAccessory) {
-        this.sonosDevice = new Sonos(accessory.context.device.host);
+        let deviceDetails = accessory.context.device as DeviceDetails;
+        this.isSoundbar = deviceDetails.IsSoundBar;
+        this.sonosDevice = new Sonos(deviceDetails.Host);
+        this.logger = new SonosLogger(deviceDetails.ModelName, this.platform.log);
 
-        this.sonosDevice.deviceDescription().then((desc) => {
-            // set accessory information
-            this.accessory
-                .getService(this.platform.Service.AccessoryInformation)!
-                .setCharacteristic(this.platform.Characteristic.Manufacturer, desc.manufacturer)
-                .setCharacteristic(this.platform.Characteristic.Model, desc.modelName)
-                .setCharacteristic(this.platform.Characteristic.SerialNumber, desc.serialNum);
-        });
+        this.logger.logError(`Soundbar: ${this.isSoundbar}`);
+
+        // set accessory information
+        this.accessory
+            .getService(this.platform.Service.AccessoryInformation)!
+            .setCharacteristic(this.platform.Characteristic.Manufacturer, deviceDetails.Manufacturer)
+            .setCharacteristic(this.platform.Characteristic.Model, deviceDetails.ModelName)
+            .setCharacteristic(this.platform.Characteristic.SerialNumber, deviceDetails.SerialNumber);
 
         //Volume Setup
         let currentVolumeService = this.accessory.getService('Volume');
         currentVolumeService ? this.accessory.removeService(currentVolumeService) : null;
         switch (this.platform.config.volume) {
-            case Volume.Fan:
-                this.platform.log.info('Setting up volume as fan');
+            case VolumeOptions.Fan:
+                this.logger.logInfo('Setting up volume as fan');
                 this.volumeFanSetup();
                 break;
-            case Volume.Lightbulb:
-                this.platform.log.info('Setting up volume as bulb');
+            case VolumeOptions.Lightbulb:
+                this.logger.logInfo('Setting up volume as bulb');
                 this.volumeBulbSetup();
                 break;
-            case Volume.None:
-                this.platform.log.info('No Volume Options Chosen');
+            case VolumeOptions.None:
+                this.logger.logInfo('No Volume Options Chosen');
                 break;
         }
 
@@ -54,14 +61,16 @@ export class SonosPlatformAccessory {
                 .on('set', this.handleMuteSwitchSet.bind(this));
         }
 
-        this.nightModeService =
-            this.accessory.getService('Night Mode') || this.accessory.addService(this.platform.Service.Switch, 'Night Mode', 'NightMode');
-        this.speechEnhancementService =
-            this.accessory.getService('Speech Enhancement') ||
-            this.accessory.addService(this.platform.Service.Switch, 'Speech Enhancement', 'Speech');
+        if (deviceDetails.IsSoundBar) {
+            this.nightModeService =
+                this.accessory.getService('Night Mode') || this.accessory.addService(this.platform.Service.Switch, 'Night Mode', 'NightMode');
+            this.speechEnhancementService =
+                this.accessory.getService('Speech Enhancement') ||
+                this.accessory.addService(this.platform.Service.Switch, 'Speech Enhancement', 'Speech');
 
-        this.speechEnhancementService.getCharacteristic(this.platform.Characteristic.On).on('set', this.handleSpeechEnhancementSet.bind(this));
-        this.nightModeService.getCharacteristic(this.platform.Characteristic.On).on('set', this.handleNightModeSet.bind(this));
+            this.speechEnhancementService.getCharacteristic(this.platform.Characteristic.On).on('set', this.handleSpeechEnhancementSet.bind(this));
+            this.nightModeService.getCharacteristic(this.platform.Characteristic.On).on('set', this.handleNightModeSet.bind(this));
+        }
 
         this.sonosDevice.on('RenderingControl', (data) => {
             if (data.Volume) {
@@ -74,10 +83,10 @@ export class SonosPlatformAccessory {
                 }
             }
 
-            if (data.DialogLevel) {
+            if (data.DialogLevel && this.speechEnhancementService !== undefined) {
                 this.speechEnhancementService.updateCharacteristic(this.platform.Characteristic.On, data.DialogLevel.val);
             }
-            if (data.NightMode) {
+            if (data.NightMode && this.nightModeService !== undefined) {
                 this.nightModeService.updateCharacteristic(this.platform.Characteristic.On, data.NightMode.val);
             }
         });
@@ -106,18 +115,17 @@ export class SonosPlatformAccessory {
     /**
      * Handle requests to get the current value of the "Mute" characteristic
      */
-    handleMuteBFGet(callback: CharacteristicGetCallback) {
-        this.platform.log.debug('Triggered GET Mute');
-        this.sonosDevice.getMuted().then((mute) => {
-            callback(null, !mute);
-        });
+    async handleMuteBFGet(callback: CharacteristicGetCallback) {
+        this.logger.logDebug('Triggered GET Mute');
+        let mute = await this.sonosDevice.getMuted();
+        callback(null, !mute);
     }
 
     /**
      * Handle requests to set the "Mute" characteristic
      */
     handleMuteBFSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.debug('Triggered SET Mute:', !value);
+        this.logger.logDebug(`Triggered SET Mute: ${!value}`);
         this.sonosDevice.setMuted(!value);
         callback(null);
     }
@@ -125,39 +133,48 @@ export class SonosPlatformAccessory {
     /**
      * Handle requests to get the current value of the "Mute" characteristic
      */
-    handleMuteSwitchGet(callback: CharacteristicGetCallback) {
-        this.sonosDevice.getMuted().then((mute) => {
-            this.platform.log.debug(`Triggered GET Mute switch: ${mute}`);
-            callback(null, mute);
-        });
+    async handleMuteSwitchGet(callback: CharacteristicGetCallback) {
+        let mute = await this.sonosDevice.getMuted();
+        this.logger.logDebug(`Triggered GET Mute switch: ${mute}`);
+        callback(null, mute);
     }
 
     /**
      * Handle requests to set the "Mute" characteristic
      */
-    handleMuteSwitchSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.debug('Triggered SET Mute switch:', value);
+    async handleMuteSwitchSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+        if (value && !this.isSoundbar) {
+            this.previousLevel = await this.sonosDevice.getVolume();
+            this.logger.logError(`${this.previousLevel}`);
+        }
+
+        this.logger.logDebug(`Triggered SET Mute switch: ${value}`);
         this.sonosDevice.setMuted(value);
+
+        if (!value && !this.isSoundbar && this.previousLevel !== 0) {
+            this.logger.logError(`${this.previousLevel}`);
+            this.sonosDevice.setVolume(this.previousLevel);
+        }
+
         callback(null);
     }
 
     /**
      * Handle requests to get the current value of the "Volume" characteristic
      */
-    handleVolumeGet(callback: CharacteristicGetCallback) {
-        this.platform.log.debug('Triggered GET Volume');
+    async handleVolumeGet(callback: CharacteristicGetCallback) {
+        this.logger.logDebug('Triggered GET Volume');
 
-        this.sonosDevice.getVolume().then((volume) => {
-            this.platform.log.debug(volume);
-            callback(null, volume);
-        });
+        let volume = await this.sonosDevice.getVolume();
+        this.logger.logDebug(volume);
+        callback(null, volume);
     }
 
     /**
      * Handle requests to set the "Volume" characteristic
      */
     handleVolumeSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.debug('Triggered SET Volume:', value);
+        this.logger.logDebug(`Triggered SET Volume: ${value}`);
         this.sonosDevice.setVolume(value);
         callback(null);
     }
@@ -166,7 +183,7 @@ export class SonosPlatformAccessory {
      * Handle requests to set the "Speech Enhancement" characteristic
      */
     handleSpeechEnhancementSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.debug('Triggered SET Speech Enhancement:', value);
+        this.logger.logDebug(`Triggered SET Speech Enhancement: ${value}`);
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
         callback(null);
     }
@@ -175,7 +192,7 @@ export class SonosPlatformAccessory {
      * Handle requests to set the "Night Mode" characteristic
      */
     handleNightModeSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.platform.log.debug('Triggered SET Night Mode:', value);
+        this.logger.logDebug(`Triggered SET Night Mode: ${value}`);
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
         callback(null);
     }
