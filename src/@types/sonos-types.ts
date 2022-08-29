@@ -172,3 +172,41 @@ export interface Service {
     eventSubURL: string;
     SCPDURL: string;
 }
+
+export interface RenderingControl {
+    val: string;
+    Volume: Loudness[];
+    Mute: Loudness[];
+    Bass: AudioDelay;
+    Treble: AudioDelay;
+    Loudness: Loudness;
+    OutputFixed: AudioDelay;
+    HeadphoneConnected: AudioDelay;
+    SpeakerSize: AudioDelay;
+    SubGain: AudioDelay;
+    SubCrossover: AudioDelay;
+    SubPolarity: AudioDelay;
+    SubEnabled: AudioDelay;
+    DialogLevel: AudioDelay;
+    SurroundLevel: AudioDelay;
+    MusicSurroundLevel: AudioDelay;
+    AudioDelay: AudioDelay;
+    AudioDelayLeftRear: AudioDelay;
+    AudioDelayRightRear: AudioDelay;
+    NightMode: AudioDelay;
+    SurroundEnabled: AudioDelay;
+    SurroundMode: AudioDelay;
+    HeightChannelLevel: AudioDelay;
+    SonarEnabled: AudioDelay;
+    SonarCalibrationAvailable: AudioDelay;
+    PresetNameList: AudioDelay;
+}
+
+export interface AudioDelay {
+    val: string;
+}
+
+export interface Loudness {
+    channel: string;
+    val: string;
+}
