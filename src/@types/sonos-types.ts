@@ -4,7 +4,7 @@ export interface Device {
     options: Options;
     _events: Events;
     _eventsCount: number;
-    getAllGroups(): Group[];
+    getAllGroups(): Promise<Group[]>;
 }
 
 export interface Events {}
@@ -126,7 +126,7 @@ export interface Device {
     serviceList: ServiceList;
     iconList?: IconList;
     serialNum: string;
-    deviceDescription(): DeviceDescription;
+    deviceDescription(): Promise<DeviceDescription>;
 }
 
 export interface XRhapsodyExtension {

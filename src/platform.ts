@@ -51,9 +51,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
 
-        sonosDevices.forEach(async (device) => {
-            this.registerDiscoveredDevices(device);
-        });
+        for (let device of sonosDevices) {
+            await this.registerDiscoveredDevices(device);
+        }
 
         this.removeDevicesNotDiscovered();
     }
@@ -67,7 +67,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         if (this.config.soundbarsOnly && !IsSoundBar) return;
 
-        let deviceDisplayName = description.displayName;
+        let deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
 
         const uuid = this.api.hap.uuid.generate(description.MACAddress);
         this.foundDevices.push({ uuid: uuid, name: deviceDisplayName });
@@ -90,6 +90,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             Manufacturer: description.manufacturer,
             SerialNumber: description.serialNum,
             ModelName: description.modelName,
+            FirmwareVersion: description.softwareVersion,
         } as DeviceDetails;
         new SonosPlatformAccessory(this, accessory);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -102,15 +103,12 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         const removedAccessories = this.accessories.filter((accessory) => {
             return this.foundDevices.map((x) => x.uuid).indexOf(accessory.UUID) === -1;
         });
-        removedAccessories.forEach((accessory) => this.log.info(`Removing ${accessory.context.device.host}`));
 
-        let removingString = JSON.stringify(
-            removedAccessories.map((x) => {
-                x.UUID, x.displayName;
-            })
-        );
+        removedAccessories.forEach((accessory) => {
+            let deviceDetails = accessory.context.device as DeviceDetails;
+            this.log.info(`Removing ${deviceDetails.Host}`);
+        });
 
-        this.log.debug(`Now removing the following ${removingString}`);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 }

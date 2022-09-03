@@ -14,6 +14,11 @@
                 "type": "boolean",
                 "default": true
             },
+            "roomNameAsName": {
+                "title": "Use the room name as the device name. The default is to use device name",
+                "type": "boolean",
+                "default": false
+            },
             "volume": {
                 "title": "Volume Options",
                 "type": "string",

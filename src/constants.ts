@@ -13,10 +13,17 @@ export type DeviceDetails = {
     Manufacturer: string;
     ModelName: string;
     SerialNumber: string;
+    FirmwareVersion: string;
 };
 
 export enum VolumeOptions {
     None = 'none',
     Lightbulb = 'bulb',
     Fan = 'fan',
+}
+
+export enum DeviceEvents {
+    DeviceVolumeUpdate = 'DeviceVolumeUpdate',
+    SpeechEnhancementUpdate = 'SpeechEnhancementUpdate',
+    NightModeUpdate = 'NightModeUpdate',
 }

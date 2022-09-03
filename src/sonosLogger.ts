@@ -4,20 +4,20 @@ export class SonosLogger {
     private log: Logger;
     private logHeader: string;
 
-    constructor(name: string, log: Logger) {
+    constructor(deviceName: string, log: Logger) {
         this.log = log;
-        this.logHeader = `${name} - `;
+        this.logHeader = `${deviceName} - `;
     }
 
-    logInfo(message: string) {
+    public logInfo(message: string): void {
         this.log.info(`${this.logHeader}${message}`);
     }
 
-    logDebug(message: string) {
+    public logDebug(message: string): void {
         this.log.debug(`${this.logHeader}${message}`);
     }
 
-    logError(message: string) {
+    public logError(message: string): void {
         this.log.error(`${this.logHeader}${message}`);
     }
 }
