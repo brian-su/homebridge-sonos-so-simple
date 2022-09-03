@@ -2,6 +2,12 @@
 
 Changes to the repo are noted here:
 
+## 0.2.0 - 2022-09-05
+
+### Features:
+
+Adding support for zones and for the Ray soundbar
+
 ## 0.1.3 - 2022-02-27
 
 ### Features:
