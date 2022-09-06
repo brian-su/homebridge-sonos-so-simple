@@ -17,6 +17,7 @@
     },
     "main": "dist/index.js",
     "scripts": {
+        "preinstall": "node -p \"'export const PACKAGE_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
         "prettify": "prettier --write 'src/*.{js,ts}' '*.json' 'src/services/*.ts'",
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",

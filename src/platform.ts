@@ -3,6 +3,7 @@ import { DeviceDetails, FoundDevices, PLATFORM_NAME, PLUGIN_NAME } from './const
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
+import { PACKAGE_VERSION } from './version';
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -69,7 +70,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         let deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
 
-        const uuid = this.api.hap.uuid.generate(description.MACAddress);
+        const uuid = this.api.hap.uuid.generate(`${description.MACAddress}:${PACKAGE_VERSION}`);
         this.foundDevices.push({ uuid: uuid, name: deviceDisplayName });
         this.log.debug(`Found device - UUID is : ${uuid}`);
         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
