@@ -10,12 +10,12 @@
                 "type": "boolean"
             },
             "soundbarsOnly": {
-                "title": "Only offer controls for soundbars (Beam, Arc, Playbar)",
+                "title": "Only offer controls for soundbars (Beam, Arc, Playbar, Ray)",
                 "type": "boolean",
                 "default": true
             },
             "roomNameAsName": {
-                "title": "Use the room name as device name? Leaving this unchecked will use the device name instead (Beam, Arc, Play1 etc). You may need to uninstall and reinstall the plugin to be able to get the Home app to pick up the name changes",
+                "title": "Use the room name as the device name. The default is to use device name",
                 "type": "boolean",
                 "default": false
             },
