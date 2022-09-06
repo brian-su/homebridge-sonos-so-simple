@@ -1,7 +1,7 @@
 {
     "displayName": "Sonos So Simple",
     "name": "homebridge-sonos-so-simple",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "A very simple plugin for controlling Sonos devices via Homebridge.",
     "license": "Apache-2.0",
     "repository": {
@@ -17,7 +17,6 @@
     },
     "main": "dist/index.js",
     "scripts": {
-        "preinstall": "node -p \"'export const PACKAGE_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
         "prettify": "prettier --write 'src/*.{js,ts}' '*.json' 'src/services/*.ts'",
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",
