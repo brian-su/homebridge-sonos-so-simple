@@ -2,7 +2,7 @@ import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
 import { DeviceDetails, DeviceEvents } from './constants';
-import { SonosLogger } from './SonosLogger';
+import { SonosLogger } from './sonosLogger';
 import { PlatformDeviceManager } from './platformDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';

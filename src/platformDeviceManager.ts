@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { DeviceDetails, DeviceEvents } from './constants';
 import { Sonos } from 'sonos';
-import { SonosLogger } from './SonosLogger';
+import { SonosLogger } from './sonosLogger';
 
 export class PlatformDeviceManager extends EventEmitter {
     private sonosDevice: Sonos;
