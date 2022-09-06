@@ -1,8 +1,8 @@
 {
     "displayName": "Sonos So Simple",
     "name": "homebridge-sonos-so-simple",
-    "version": "0.2.1",
-    "description": "A very simple plugin for controlling Sonos Beam/Arc via Homebridge.",
+    "version": "0.2.2",
+    "description": "A very simple plugin for controlling Sonos devices via Homebridge.",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
