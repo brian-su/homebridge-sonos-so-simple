@@ -3,17 +3,27 @@ import { SonosPlatform } from '../platform';
 import { PlatformDeviceManager } from '../platformDeviceManager';
 
 export class SpeechEnhancementService {
-    private speechEnhancementService: Service;
+    private service: Service;
+    private name: string = 'Speech Enhancement';
     private readonly device: PlatformDeviceManager;
 
-    constructor(private readonly platform: SonosPlatform, private readonly accessory: PlatformAccessory, sonosDevice: PlatformDeviceManager) {
+    constructor(
+        private readonly platform: SonosPlatform,
+        private readonly accessory: PlatformAccessory,
+        sonosDevice: PlatformDeviceManager,
+        displayOrder: number
+    ) {
         this.device = sonosDevice;
 
-        this.speechEnhancementService =
-            this.accessory.getService('Speech Enhancement') ||
-            this.accessory.addService(this.platform.Service.Switch, 'Speech Enhancement', 'Speech');
+        this.service = this.accessory.getService(this.name) || this.accessory.addService(this.platform.Service.Switch, this.name, 'Speech');
 
-        this.speechEnhancementService.getCharacteristic(this.platform.Characteristic.On).onSet(this.handleSpeechEnhancementSet.bind(this));
+        this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
+        this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+
+        this.service.addOptionalCharacteristic(this.platform.Characteristic.ServiceLabelIndex);
+        this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);
+
+        this.service.getCharacteristic(this.platform.Characteristic.On).onSet(this.handleSpeechEnhancementSet.bind(this));
     }
 
     private handleSpeechEnhancementSet(value: CharacteristicValue) {
@@ -22,6 +32,6 @@ export class SpeechEnhancementService {
 
     //TODO: the characteristic value here should probably be boolean (think truthyness is helping)
     public updateCharacteristic(value: number) {
-        this.speechEnhancementService.updateCharacteristic(this.platform.Characteristic.On, value);
+        this.service.updateCharacteristic(this.platform.Characteristic.On, value);
     }
 }

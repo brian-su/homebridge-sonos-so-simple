@@ -28,10 +28,11 @@ export class SonosPlatformAccessory {
 
         var manager = new PlatformDeviceManager(this.sonosDevice, this.logger, deviceDetails);
 
-        const volumeControls = new VolumeControlService(platform, accessory, manager);
-        const speechEnhancementService = deviceDetails.IsSoundBar ? new SpeechEnhancementService(platform, accessory, manager) : null;
-        const nightModeService = deviceDetails.IsSoundBar ? new NightModeService(platform, accessory, manager) : null;
-        new MuteService(platform, accessory, manager);
+        let displayOrder = 1;
+        const volumeControls = new VolumeControlService(platform, accessory, manager, displayOrder++);
+        new MuteService(platform, accessory, manager, displayOrder++);
+        const speechEnhancementService = deviceDetails.IsSoundBar ? new SpeechEnhancementService(platform, accessory, manager, displayOrder++) : null;
+        const nightModeService = deviceDetails.IsSoundBar ? new NightModeService(platform, accessory, manager, displayOrder++) : null;
 
         manager.on(DeviceEvents.DeviceVolumeUpdate, (volume: number) => {
             volumeControls.updateCharacteristic(volume);
