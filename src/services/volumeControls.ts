@@ -1,48 +1,52 @@
-import { Service, PlatformAccessory, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import { Fan, Lightbulb } from 'hap-nodejs/dist/lib/definitions/ServiceDefinitions';
 import { VolumeOptions } from '../constants';
 import { SonosPlatform } from '../platform';
 import { PlatformDeviceManager } from '../platformDeviceManager';
 
 export class VolumeControlService {
     private readonly device: PlatformDeviceManager;
-    private volumeBulbService: Service | undefined;
-    private volumeFanService: Service | undefined;
+    private service: Service | undefined;
+    private name: string = 'Volume';
+    private serviceType: typeof Fan | typeof Lightbulb | undefined;
+    private volumeCharacteristic: typeof RotationSpeed | typeof Brightness | undefined;
 
-    constructor(private readonly platform: SonosPlatform, private readonly accessory: PlatformAccessory, sonosDevice: PlatformDeviceManager) {
+    constructor(
+        private readonly platform: SonosPlatform,
+        private readonly accessory: PlatformAccessory,
+        sonosDevice: PlatformDeviceManager,
+        displayOrder: number
+    ) {
         this.device = sonosDevice;
 
-        let currentVolumeService = this.accessory.getService('Volume');
+        let currentVolumeService = this.accessory.getService(this.name);
         currentVolumeService ? this.accessory.removeService(currentVolumeService) : null;
+
         switch (this.platform.config.volume) {
             case VolumeOptions.Fan:
-                this.volumeFanSetup();
+                this.serviceType = this.platform.Service.Fan;
+                this.volumeCharacteristic = this.platform.Characteristic.RotationSpeed;
                 break;
             case VolumeOptions.Lightbulb:
-                this.volumeBulbSetup();
+                this.serviceType = this.platform.Service.Lightbulb;
+                this.volumeCharacteristic = this.platform.Characteristic.Brightness;
                 break;
             case VolumeOptions.None:
-                break;
+                return;
         }
-    }
 
-    private volumeFanSetup() {
-        this.volumeFanService = this.accessory.addService(this.platform.Service.Fan, 'Volume', 'Volume');
-        this.volumeFanService
-            .getCharacteristic(this.platform.Characteristic.On)
-            .onGet(this.handleMuteGet.bind(this))
-            .onSet(this.handleMuteSet.bind(this));
+        this.service = this.accessory.addService(this.serviceType!, this.name, this.name);
 
-        this.volumeFanService.getCharacteristic(this.platform.Characteristic.RotationSpeed).onSet(this.handleVolumeSet.bind(this));
-    }
+        this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
+        this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
 
-    private volumeBulbSetup() {
-        this.volumeBulbService = this.accessory.addService(this.platform.Service.Lightbulb, 'Volume', 'Volume');
-        this.volumeBulbService
-            .getCharacteristic(this.platform.Characteristic.On)
-            .onGet(this.handleMuteGet.bind(this))
-            .onSet(this.handleMuteSet.bind(this));
+        this.service.addOptionalCharacteristic(this.platform.Characteristic.ServiceLabelIndex);
+        this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);
 
-        this.volumeBulbService.getCharacteristic(this.platform.Characteristic.Brightness).onSet(this.handleVolumeSet.bind(this));
+        this.service.getCharacteristic(this.platform.Characteristic.On).onGet(this.handleMuteGet.bind(this)).onSet(this.handleMuteSet.bind(this));
+
+        this.service.getCharacteristic(this.volumeCharacteristic!).onSet(this.handleVolumeSet.bind(this));
     }
 
     private async handleMuteGet() {
@@ -60,13 +64,9 @@ export class VolumeControlService {
 
     public updateCharacteristic(volume: number) {
         this.platform.log.debug('Update Volume Triggered');
-        if (this.volumeFanService) {
+        if (this.service) {
             this.platform.log.debug(`Setting Fan To: ${volume}`);
-            this.volumeFanService.updateCharacteristic(this.platform.Characteristic.RotationSpeed, volume);
-        }
-        if (this.volumeBulbService) {
-            this.platform.log.debug(`Setting Bulb To: ${volume}`);
-            this.volumeBulbService.updateCharacteristic(this.platform.Characteristic.Brightness, volume);
+            this.service.updateCharacteristic(this.volumeCharacteristic!, volume);
         }
     }
 }
