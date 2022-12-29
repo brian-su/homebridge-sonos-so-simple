@@ -1,4 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import { Fan, Lightbulb } from 'hap-nodejs/dist/lib/definitions/ServiceDefinitions';
 import { VolumeOptions } from '../constants';
 import { SonosPlatform } from '../platform';
 import { PlatformDeviceManager } from '../platformDeviceManager';
@@ -7,8 +9,8 @@ export class VolumeControlService {
     private readonly device: PlatformDeviceManager;
     private service: Service | undefined;
     private name: string = 'Volume';
-    private serviceType: any; //Fan | Lightbulb;
-    private volumeCharacteristic: any; //RotationSpeed | Brightness;
+    private serviceType: typeof Fan | typeof Lightbulb | undefined;
+    private volumeCharacteristic: typeof RotationSpeed | typeof Brightness | undefined;
 
     constructor(
         private readonly platform: SonosPlatform,
@@ -34,7 +36,7 @@ export class VolumeControlService {
                 return;
         }
 
-        this.service = this.accessory.addService(this.serviceType, this.name, this.name);
+        this.service = this.accessory.addService(this.serviceType!, this.name, this.name);
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
         this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
@@ -44,7 +46,7 @@ export class VolumeControlService {
 
         this.service.getCharacteristic(this.platform.Characteristic.On).onGet(this.handleMuteGet.bind(this)).onSet(this.handleMuteSet.bind(this));
 
-        this.service.getCharacteristic(this.volumeCharacteristic).onSet(this.handleVolumeSet.bind(this));
+        this.service.getCharacteristic(this.volumeCharacteristic!).onSet(this.handleVolumeSet.bind(this));
     }
 
     private async handleMuteGet() {
@@ -64,7 +66,7 @@ export class VolumeControlService {
         this.platform.log.debug('Update Volume Triggered');
         if (this.service) {
             this.platform.log.debug(`Setting Fan To: ${volume}`);
-            this.service.updateCharacteristic(this.volumeCharacteristic, volume);
+            this.service.updateCharacteristic(this.volumeCharacteristic!, volume);
         }
     }
 }
