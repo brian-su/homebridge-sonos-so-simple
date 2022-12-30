@@ -17,12 +17,13 @@
     },
     "main": "dist/index.js",
     "scripts": {
-        "prettify": "prettier --write 'src/*.{js,ts,json}' '*.json' 'src/services/*.ts'",
+        "pretty": "prettier --write 'src/*.ts' 'src/*/*.ts' '*.json' ",
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",
         "prepublishOnly": "npm run build",
         "localDev": "npm run build && npm link && homebridge -D -I",
-        "trackDev": "npm run watch"
+        "trackDev": "npm run watch",
+        "prepare": "husky install"
     },
     "keywords": [
         "homebridge-plugin"
@@ -35,6 +36,7 @@
         "@typescript-eslint/eslint-plugin": "^4.14.0",
         "@typescript-eslint/parser": "^4.14.0",
         "homebridge": "^1.2.5",
+        "husky": "^8.0.2",
         "nodemon": "^2.0.7",
         "prettier": "^2.2.1",
         "rimraf": "^3.0.2",
