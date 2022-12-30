@@ -120,5 +120,5 @@ dist
 .yarn/build-state.yml
 .pnp.*
 
-.vscode/**
+.vscode
 .DS_Store
