@@ -1,5 +1,5 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { DeviceDetails, FoundDevices, PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME } from './constants';
+import { DeviceDetails, FoundDevices, BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME } from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
@@ -69,7 +69,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         let deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
 
-        const uuid = this.api.hap.uuid.generate(`${description.MACAddress}:${PACKAGE_VERSION}`);
+        const uuid = this.api.hap.uuid.generate(`${description.MACAddress}:${BREAKING_CHANGE_PACKAGE_VERSION}`);
         this.foundDevices.push({ uuid: uuid, name: deviceDisplayName });
         this.log.debug(`Found device - UUID is : ${uuid}`);
         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
