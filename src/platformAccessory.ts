@@ -10,23 +10,20 @@ import { NightModeService } from './services/nightMode';
 import { SonosLogger } from './helpers/sonosLogger';
 
 export class SonosPlatformAccessory {
-    private sonosDevice: Sonos;
-    private logger: SonosLogger;
-
-    constructor(private readonly platform: SonosPlatform, private readonly accessory: PlatformAccessory) {
-        let deviceDetails = accessory.context.device as DeviceDetails;
-        this.sonosDevice = new Sonos(deviceDetails.Host);
-        this.logger = new SonosLogger(deviceDetails.ModelName, this.platform.log);
+    constructor(platform: SonosPlatform, accessory: PlatformAccessory) {
+        const deviceDetails = accessory.context.device as DeviceDetails;
+        const sonosDevice = new Sonos(deviceDetails.Host);
+        const logger = new SonosLogger(deviceDetails.ModelName, platform.log);
 
         // set accessory information
-        this.accessory
-            .getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, deviceDetails.Manufacturer)
-            .setCharacteristic(this.platform.Characteristic.Model, deviceDetails.ModelName)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, deviceDetails.SerialNumber)
-            .setCharacteristic(this.platform.Characteristic.FirmwareRevision, deviceDetails.FirmwareVersion);
+        accessory
+            .getService(platform.Service.AccessoryInformation)!
+            .setCharacteristic(platform.Characteristic.Manufacturer, deviceDetails.Manufacturer)
+            .setCharacteristic(platform.Characteristic.Model, deviceDetails.ModelName)
+            .setCharacteristic(platform.Characteristic.SerialNumber, deviceDetails.SerialNumber)
+            .setCharacteristic(platform.Characteristic.FirmwareRevision, deviceDetails.FirmwareVersion);
 
-        var manager = new SonosDeviceManager(this.sonosDevice, this.logger, deviceDetails);
+        var manager = new SonosDeviceManager(sonosDevice, logger, deviceDetails);
 
         let displayOrder = 1;
         if (platform.config.volume !== VolumeOptions.None) new VolumeControlService(platform, accessory, manager, displayOrder++);
