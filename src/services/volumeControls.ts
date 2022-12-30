@@ -32,8 +32,6 @@ export class VolumeControlService {
                 this.serviceType = this.platform.Service.Lightbulb;
                 this.volumeCharacteristic = this.platform.Characteristic.Brightness;
                 break;
-            case VolumeOptions.None:
-                return;
         }
 
         this.service = this.accessory.addService(this.serviceType!, this.name, this.name);

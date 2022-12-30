@@ -1,7 +1,7 @@
 import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
-import { DeviceDetails } from './constants';
+import { DeviceDetails, VolumeOptions } from './constants';
 import { SonosDeviceManager } from './helpers/sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
@@ -29,8 +29,8 @@ export class SonosPlatformAccessory {
         var manager = new SonosDeviceManager(this.sonosDevice, this.logger, deviceDetails);
 
         let displayOrder = 1;
-        new VolumeControlService(platform, accessory, manager, displayOrder++);
-        new MuteService(platform, accessory, manager, displayOrder++);
+        if (this.platform.config.volume !== VolumeOptions.None) new VolumeControlService(platform, accessory, manager, displayOrder++);
+        if (platform.config.muteSwitch) new MuteService(platform, accessory, manager, displayOrder++);
         if (deviceDetails.IsSoundBar) new SpeechEnhancementService(platform, accessory, manager, displayOrder++);
         if (deviceDetails.IsSoundBar) new NightModeService(platform, accessory, manager, displayOrder++);
     }

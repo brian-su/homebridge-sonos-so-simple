@@ -19,8 +19,6 @@ export class MuteService {
         let oldMuteService = this.accessory.getService(this.name);
         oldMuteService ? this.accessory.removeService(oldMuteService) : null;
 
-        if (!this.platform.config.muteSwitch) return;
-
         this.service = this.accessory.addService(this.platform.Service.Switch, this.name, this.name);
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
