@@ -7,12 +7,13 @@
         "properties": {
             "muteSwitch": {
                 "title": "Separate Switch For Mute?",
-                "type": "boolean"
+                "type": "boolean",
+                "default": true
             },
             "soundbarsOnly": {
                 "title": "Only offer controls for soundbars (Beam, Arc, Playbar, Ray)",
                 "type": "boolean",
-                "default": true
+                "default": false
             },
             "roomNameAsName": {
                 "title": "Use the room name as the device name. The default is to use device name",
