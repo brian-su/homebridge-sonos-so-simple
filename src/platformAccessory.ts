@@ -55,8 +55,8 @@ export class SonosPlatformAccessory {
             this.removeOldService(ServiceNames.NightModeService);
         }
 
-        new VolumeButtonService(platform, accessory, manager, ServiceNames.UpButtonService, displayOrder++);
-        new VolumeButtonService(platform, accessory, manager, ServiceNames.DownButtonService, displayOrder++);
+        // new VolumeButtonService(platform, accessory, manager, ServiceNames.UpButtonService, displayOrder++);
+        // new VolumeButtonService(platform, accessory, manager, ServiceNames.DownButtonService, displayOrder++);
     }
 
     private removeOldService(name: string) {
