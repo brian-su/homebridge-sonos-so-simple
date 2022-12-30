@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicGetCallback, Characteristic } from 'homebridge';
 import { SonosPlatform } from '../platform';
-import { SonosDeviceManager } from '../sonosDeviceManager';
+import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 
 export class MuteService {
     private service: Service | undefined;

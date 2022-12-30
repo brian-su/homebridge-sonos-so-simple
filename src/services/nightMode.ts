@@ -1,7 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { DeviceEvents } from '../constants';
 import { SonosPlatform } from '../platform';
-import { SonosDeviceManager } from '../sonosDeviceManager';
+import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 
 export class NightModeService {
     private service: Service;

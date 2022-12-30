@@ -3,7 +3,7 @@ import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/Chara
 import { Fan, Lightbulb } from 'hap-nodejs/dist/lib/definitions/ServiceDefinitions';
 import { DeviceEvents, VolumeOptions } from '../constants';
 import { SonosPlatform } from '../platform';
-import { SonosDeviceManager } from '../sonosDeviceManager';
+import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 
 export class VolumeControlService {
     private readonly device: SonosDeviceManager;

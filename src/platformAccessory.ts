@@ -2,12 +2,12 @@ import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
 import { DeviceDetails } from './constants';
-import { SonosLogger } from './sonosLogger';
-import { SonosDeviceManager } from './sonosDeviceManager';
+import { SonosDeviceManager } from './helpers/sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
 import { SpeechEnhancementService } from './services/speechEnhancement';
 import { NightModeService } from './services/nightMode';
+import { SonosLogger } from './helpers/sonosLogger';
 
 export class SonosPlatformAccessory {
     private sonosDevice: Sonos;

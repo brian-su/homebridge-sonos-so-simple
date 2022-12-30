@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { DeviceDetails, DeviceEvents } from './constants';
+import { DeviceDetails, DeviceEvents } from '../constants';
 import { Sonos } from 'sonos';
 import { SonosLogger } from './sonosLogger';
 
