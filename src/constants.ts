@@ -7,6 +7,8 @@ export const BREAKING_CHANGE_PACKAGE_VERSION = '0.2.6';
 export const PLATFORM_NAME = 'SonosSoSimplePlatform';
 export const PLUGIN_NAME = 'homebridge-sonos-so-simple';
 
+export const SOUNDBAR_NAMES = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
+
 export type FoundDevices = {
     uuid: string;
     name: string;
