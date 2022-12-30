@@ -18,7 +18,9 @@ NOTE: Choosing to treat the volume as a lightbulb will cause the volume to mute 
     "platforms": [
         ...
         {
-            "muteSwitch": true,
+            "muteSwitch": true, //with this to false there will be no mute switch, you will only be able to toggle volume by turning the volume off
+            "soundbarsOnly": false, //if you only want to expose your TV soundbar, and not sonos speakers in another room, set this to true
+            "roomNameAsName": false, //setting this to false will take the master device name instead; e.g. Beam
             "volume": "fan", //Options here are bulb/fan/none
             "platform": "SonosSoSimplePlatform"
         }
