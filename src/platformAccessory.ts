@@ -26,6 +26,7 @@ export class SonosPlatformAccessory {
         var manager = new SonosDeviceManager(sonosDevice, logger, deviceDetails);
 
         let displayOrder = 1;
+        //FIXME: Not instantiating the classes will mean any current services already registered won't be removed. Dumbass.
         if (platform.config.volume !== VolumeOptions.None) new VolumeControlService(platform, accessory, manager, displayOrder++);
         if (platform.config.muteSwitch) new MuteService(platform, accessory, manager, displayOrder++);
         if (deviceDetails.IsSoundBar) new SpeechEnhancementService(platform, accessory, manager, displayOrder++);
