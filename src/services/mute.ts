@@ -1,11 +1,12 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicGetCallback, Characteristic } from 'homebridge';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
+import { ServiceNames } from '../constants';
 
 export class MuteService {
     private service: Service | undefined;
     private readonly device: SonosDeviceManager;
-    private name: string = 'Mute';
+    private name: string = ServiceNames.MuteService;
 
     constructor(
         private readonly platform: SonosPlatform,
@@ -15,12 +16,7 @@ export class MuteService {
     ) {
         this.device = sonosDevice;
 
-        //Optional Mute Switch, so remove it incase the user has chosen no mute.
-        let oldMuteService = this.accessory.getService(this.name);
-        oldMuteService ? this.accessory.removeService(oldMuteService) : null;
-
-        this.service = this.accessory.addService(this.platform.Service.Switch, this.name, this.name);
-
+        this.service = this.accessory.getService(this.name) || this.accessory.addService(this.platform.Service.Switch, this.name, this.name);
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
         this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
 

@@ -1,11 +1,11 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { DeviceEvents } from '../constants';
+import { DeviceEvents, ServiceNames } from '../constants';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 
 export class SpeechEnhancementService {
     private service: Service;
-    private name: string = 'Speech Enhancement';
+    private name: string = ServiceNames.SpeechEnhancementService;
     private readonly device: SonosDeviceManager;
 
     constructor(
@@ -36,7 +36,7 @@ export class SpeechEnhancementService {
     }
 
     //TODO: the characteristic value here should probably be boolean (think truthyness is helping)
-    public updateCharacteristic(value: number) {
+    private updateCharacteristic(value: number) {
         this.service.updateCharacteristic(this.platform.Characteristic.On, value);
     }
 }

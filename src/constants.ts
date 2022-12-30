@@ -32,3 +32,12 @@ export enum DeviceEvents {
     SpeechEnhancementUpdate = 'SpeechEnhancementUpdate',
     NightModeUpdate = 'NightModeUpdate',
 }
+
+export enum ServiceNames {
+    VolumeService = 'Volume',
+    MuteService = 'Mute',
+    SpeechEnhancementService = 'Speech Enhancement',
+    NightModeService = 'Night Mode',
+    UpButtonService = 'Up Button',
+    DownButtonService = 'Down Button',
+}
