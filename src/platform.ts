@@ -1,5 +1,5 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { DeviceDetails, FoundDevices, BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME } from './constants';
+import { DeviceDetails, FoundDevices, BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES } from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
@@ -14,7 +14,6 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
-    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
 
@@ -63,7 +62,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         let description = await device.deviceDescription();
         let displayNameUpperCase = description.displayName.toUpperCase();
-        let IsSoundBar = this.soundbars.includes(displayNameUpperCase);
+        let IsSoundBar = SOUNDBAR_NAMES.includes(displayNameUpperCase);
 
         if (this.config.soundbarsOnly && !IsSoundBar) return;
 
