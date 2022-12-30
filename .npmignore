@@ -5,6 +5,7 @@ src
 
 # gitHub actions
 .github
+.husky
 
 # eslint
 .eslintrc
