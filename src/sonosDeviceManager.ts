@@ -3,7 +3,7 @@ import { DeviceDetails, DeviceEvents } from './constants';
 import { Sonos } from 'sonos';
 import { SonosLogger } from './sonosLogger';
 
-export class PlatformDeviceManager extends EventEmitter {
+export class SonosDeviceManager extends EventEmitter {
     private sonosDevice: Sonos;
     private log: SonosLogger;
 
@@ -21,7 +21,6 @@ export class PlatformDeviceManager extends EventEmitter {
             if (data.Volume) {
                 var master = data.Volume.find((x) => x.channel === 'Master');
                 this.log.logDebug(`VOLUME EVENT ${master.val}`);
-
                 this.emit(DeviceEvents.DeviceVolumeUpdate, master.val as number);
             }
 
@@ -34,6 +33,10 @@ export class PlatformDeviceManager extends EventEmitter {
                 this.emit(DeviceEvents.NightModeUpdate, data.NightMode.val as number);
             }
         });
+    }
+
+    public volumeUp() {
+        this.log.logInfo('Triggered GET ProgrammableSwitchEvent');
     }
 
     public async getMuted(): Promise<boolean> {

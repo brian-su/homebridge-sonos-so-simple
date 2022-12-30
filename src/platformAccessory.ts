@@ -1,9 +1,9 @@
 import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
-import { DeviceDetails, DeviceEvents } from './constants';
+import { DeviceDetails } from './constants';
 import { SonosLogger } from './sonosLogger';
-import { PlatformDeviceManager } from './platformDeviceManager';
+import { SonosDeviceManager } from './sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
 import { SpeechEnhancementService } from './services/speechEnhancement';
@@ -26,22 +26,12 @@ export class SonosPlatformAccessory {
             .setCharacteristic(this.platform.Characteristic.SerialNumber, deviceDetails.SerialNumber)
             .setCharacteristic(this.platform.Characteristic.FirmwareRevision, deviceDetails.FirmwareVersion);
 
-        var manager = new PlatformDeviceManager(this.sonosDevice, this.logger, deviceDetails);
+        var manager = new SonosDeviceManager(this.sonosDevice, this.logger, deviceDetails);
 
         let displayOrder = 1;
-        const volumeControls = new VolumeControlService(platform, accessory, manager, displayOrder++);
+        new VolumeControlService(platform, accessory, manager, displayOrder++);
         new MuteService(platform, accessory, manager, displayOrder++);
-        const speechEnhancementService = deviceDetails.IsSoundBar ? new SpeechEnhancementService(platform, accessory, manager, displayOrder++) : null;
-        const nightModeService = deviceDetails.IsSoundBar ? new NightModeService(platform, accessory, manager, displayOrder++) : null;
-
-        manager.on(DeviceEvents.DeviceVolumeUpdate, (volume: number) => {
-            volumeControls.updateCharacteristic(volume);
-        });
-        manager.on(DeviceEvents.SpeechEnhancementUpdate, (speech: number) => {
-            speechEnhancementService?.updateCharacteristic(speech);
-        });
-        manager.on(DeviceEvents.NightModeUpdate, (nightMode: number) => {
-            nightModeService?.updateCharacteristic(nightMode);
-        });
+        if (deviceDetails.IsSoundBar) new SpeechEnhancementService(platform, accessory, manager, displayOrder++);
+        if (deviceDetails.IsSoundBar) new NightModeService(platform, accessory, manager, displayOrder++);
     }
 }

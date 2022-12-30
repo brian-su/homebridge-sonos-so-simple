@@ -1,12 +1,12 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 import { Fan, Lightbulb } from 'hap-nodejs/dist/lib/definitions/ServiceDefinitions';
-import { VolumeOptions } from '../constants';
+import { DeviceEvents, VolumeOptions } from '../constants';
 import { SonosPlatform } from '../platform';
-import { PlatformDeviceManager } from '../platformDeviceManager';
+import { SonosDeviceManager } from '../sonosDeviceManager';
 
 export class VolumeControlService {
-    private readonly device: PlatformDeviceManager;
+    private readonly device: SonosDeviceManager;
     private service: Service | undefined;
     private name: string = 'Volume';
     private serviceType: typeof Fan | typeof Lightbulb | undefined;
@@ -15,7 +15,7 @@ export class VolumeControlService {
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
-        sonosDevice: PlatformDeviceManager,
+        sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;
@@ -47,6 +47,10 @@ export class VolumeControlService {
         this.service.getCharacteristic(this.platform.Characteristic.On).onGet(this.handleMuteGet.bind(this)).onSet(this.handleMuteSet.bind(this));
 
         this.service.getCharacteristic(this.volumeCharacteristic!).onSet(this.handleVolumeSet.bind(this));
+
+        this.device.on(DeviceEvents.DeviceVolumeUpdate, (volume: number) => {
+            this.updateCharacteristic(volume);
+        });
     }
 
     private async handleMuteGet() {
@@ -63,10 +67,6 @@ export class VolumeControlService {
     }
 
     public updateCharacteristic(volume: number) {
-        this.platform.log.debug('Update Volume Triggered');
-        if (this.service) {
-            this.platform.log.debug(`Setting Fan To: ${volume}`);
-            this.service.updateCharacteristic(this.volumeCharacteristic!, volume);
-        }
+        this.service!.updateCharacteristic(this.volumeCharacteristic!, volume);
     }
 }

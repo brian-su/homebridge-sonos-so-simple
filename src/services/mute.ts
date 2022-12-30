@@ -1,16 +1,16 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicGetCallback, Characteristic } from 'homebridge';
 import { SonosPlatform } from '../platform';
-import { PlatformDeviceManager } from '../platformDeviceManager';
+import { SonosDeviceManager } from '../sonosDeviceManager';
 
 export class MuteService {
     private service: Service | undefined;
-    private readonly device: PlatformDeviceManager;
+    private readonly device: SonosDeviceManager;
     private name: string = 'Mute';
 
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
-        sonosDevice: PlatformDeviceManager,
+        sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;

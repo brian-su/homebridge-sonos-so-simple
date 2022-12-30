@@ -1,16 +1,17 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { DeviceEvents } from '../constants';
 import { SonosPlatform } from '../platform';
-import { PlatformDeviceManager } from '../platformDeviceManager';
+import { SonosDeviceManager } from '../sonosDeviceManager';
 
 export class NightModeService {
     private service: Service;
     private name: string = 'Night Mode';
-    private readonly device: PlatformDeviceManager;
+    private readonly device: SonosDeviceManager;
 
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
-        sonosDevice: PlatformDeviceManager,
+        sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;
@@ -24,6 +25,10 @@ export class NightModeService {
         this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);
 
         this.service.getCharacteristic(this.platform.Characteristic.On).onSet(this.handleNightModeSet.bind(this));
+
+        this.device.on(DeviceEvents.NightModeUpdate, (nightMode: number) => {
+            this.updateCharacteristic(nightMode);
+        });
     }
 
     private handleNightModeSet(value: CharacteristicValue) {
