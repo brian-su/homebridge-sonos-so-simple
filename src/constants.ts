@@ -1,5 +1,10 @@
-export const PLATFORM_NAME = 'SonosSoSimplePlatform';
+/*
+    0.2.0 brought breaking changes so needed this to remove and re-add devices with the update
+    doesn't need updated all the time unless you need to have the devices removed
+*/
+export const PACKAGE_VERSION = '0.2.6';
 
+export const PLATFORM_NAME = 'SonosSoSimplePlatform';
 export const PLUGIN_NAME = 'homebridge-sonos-so-simple';
 
 export type FoundDevices = {

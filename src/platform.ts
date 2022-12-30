@@ -1,9 +1,8 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { DeviceDetails, FoundDevices, PLATFORM_NAME, PLUGIN_NAME } from './constants';
+import { DeviceDetails, FoundDevices, PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME } from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
-import { PACKAGE_VERSION } from './version';
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
