@@ -8,6 +8,8 @@ export const PLATFORM_NAME = 'SonosSoSimplePlatform';
 export const PLUGIN_NAME = 'homebridge-sonos-so-simple';
 
 export const SOUNDBAR_NAMES = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
+export const DEFAULT_VOLUME_EXPRESS_PORT = 3000;
+export const DEFAULT_VOLUME_CHANGE = 2;
 
 export type FoundDevices = {
     uuid: string;
@@ -23,7 +25,7 @@ export type DeviceDetails = {
     FirmwareVersion: string;
     RoomName: string;
     DisplayName: string;
-    VolumeExpressUri: string;
+    VolumeExpressPort: number;
 };
 
 export enum VolumeOptions {

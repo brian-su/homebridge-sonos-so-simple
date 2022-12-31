@@ -1,5 +1,13 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { DeviceDetails, FoundDevices, BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES } from './constants';
+import {
+    DeviceDetails,
+    FoundDevices,
+    BREAKING_CHANGE_PACKAGE_VERSION,
+    PLATFORM_NAME,
+    PLUGIN_NAME,
+    SOUNDBAR_NAMES,
+    DEFAULT_VOLUME_EXPRESS_PORT,
+} from './constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
@@ -20,7 +28,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
     private volumeExpressApp: Express | null = null;
-    private volumeExpressUri: string = '';
+    private volumeExpressPort: number | undefined;
 
     constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -112,7 +120,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             FirmwareVersion: description.softwareVersion,
             RoomName: description.roomName,
             DisplayName: description.displayName,
-            VolumeExpressUri: this.volumeExpressUri,
+            VolumeExpressPort: this.volumeExpressPort,
         } as DeviceDetails;
         new SonosPlatformAccessory(this, accessory, this.volumeExpressApp);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -138,7 +146,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
     async setupExpressApp(): Promise<Express> {
         this.log.info('Server Setting up');
-        var targetPort = 8581;
+        var targetPort = DEFAULT_VOLUME_EXPRESS_PORT;
         var actualPort = 0;
         var loopCount = 0;
 
@@ -158,7 +166,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
         });
 
-        this.volumeExpressUri = `{{YOUR_HOMEBRIDGE_ADDRESS}}:${actualPort}`;
+        this.volumeExpressPort = actualPort;
 
         return app;
     }

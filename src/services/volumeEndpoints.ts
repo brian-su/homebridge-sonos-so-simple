@@ -1,7 +1,7 @@
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { Express, Request, Response } from 'express';
 import { SonosLogger } from '../helpers/sonosLogger';
-import { DeviceDetails } from '../constants';
+import { DEFAULT_VOLUME_CHANGE, DeviceDetails } from '../constants';
 
 export class VolumeEndpointsService {
     private app: Express;
@@ -9,14 +9,14 @@ export class VolumeEndpointsService {
     private roomName: string;
     private device: SonosDeviceManager;
     private logger: SonosLogger;
-    private defaultChange: number = 2;
-    private expressUri: string;
+    private defaultChange: number = DEFAULT_VOLUME_CHANGE;
+    private port: number;
 
     constructor(expressApp: Express, deviceDetails: DeviceDetails, sonosDevice: SonosDeviceManager, logger: SonosLogger) {
         this.app = expressApp;
         this.roomName = deviceDetails.RoomName.replace(' ', '');
         this.modelName = deviceDetails.DisplayName.replace(' ', '');
-        this.expressUri = deviceDetails.VolumeExpressUri;
+        this.port = deviceDetails.VolumeExpressPort;
         this.device = sonosDevice;
         this.logger = logger;
 
@@ -29,8 +29,8 @@ export class VolumeEndpointsService {
         const downUri = `${deviceUri}/volume-down`;
 
         //Need this to tell the user where to point their buttons/shortcuts
-        this.logger.logInfo(`Volume Endpoint listening on - ${this.expressUri}${upUri}`);
-        this.logger.logInfo(`Volume Endpoint listening on - ${this.expressUri}${downUri}`);
+        this.logger.logInfo(`Volume Endpoint listening on - {{YOUR_HOMEBRIDGE_ADDRESS}}:${this.port}${upUri}`);
+        this.logger.logInfo(`Volume Endpoint listening on - {{YOUR_HOMEBRIDGE_ADDRESS}}:${this.port}${downUri}`);
 
         this.app.all(upUri, async (req: Request, res: Response) => {
             try {
