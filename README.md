@@ -61,7 +61,7 @@ You can make the request using any HTTP verb you want. GET/PUT/POST, pick whatev
 
 ### Plugin Notes & Caveats:
 
-Homekit doesn't play nicely with speakers. So to get around this you'll be offered the option to treat the volume control as a fan or a lightbulb. The goal being that you can still say 'Hey Siri, set my Beam to 20%' or have a movie scene that cranks the volume up and turns speech enhancement on.
+The Home app doesn't play nicely with speakers, or properly support most of what HomeKit offers. So to get around this you'll be offered the option to treat the volume control as a fan or a lightbulb. The goal being that you can still say 'Hey Siri, set my Beam to 20%' or have a movie scene that cranks the volume up and turns speech enhancement on.
 Choosing to treat the volume as a lightbulb will cause the volume to mute if you issue commands to turn all the lights off to Siri.
 
 The port number for the volume endpoints _could_ change when Homebridge is restarted, but I think this is unlikely. Essentially the plugin will try to grab port 3000, but if it can't it will try to grab the next available port.
