@@ -1,8 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
-import { DeviceEvents, ServiceNames, VolumeOptions } from '../constants';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
+import { ServiceNames, VolumeOptions, DeviceEvents } from '../models/enums';
 
 export class VolumeControlService {
     private readonly device: SonosDeviceManager;

@@ -1,7 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { DeviceEvents, ServiceNames } from '../constants';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
+import { ServiceNames, DeviceEvents } from '../models/enums';
 
 export class SpeechEnhancementService {
     private service: Service;

@@ -1,5 +1,5 @@
 import { API } from 'homebridge';
-import { PLATFORM_NAME } from './constants';
+import { PLATFORM_NAME } from './models/constants';
 import { SonosPlatform } from './platform';
 
 /**

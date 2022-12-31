@@ -1,7 +1,8 @@
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { Express, Request, Response } from 'express';
 import { SonosLogger } from '../helpers/sonosLogger';
-import { DEFAULT_VOLUME_CHANGE, DeviceDetails } from '../constants';
+import { DEFAULT_VOLUME_CHANGE } from '../models/constants';
+import { DeviceDetails } from '../models/models';
 
 export class VolumeEndpointsService {
     private app: Express;

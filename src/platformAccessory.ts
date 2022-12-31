@@ -1,7 +1,6 @@
 import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
-import { DeviceDetails, ServiceNames, VolumeOptions } from './constants';
 import { SonosDeviceManager } from './helpers/sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
@@ -10,6 +9,8 @@ import { NightModeService } from './services/nightMode';
 import { SonosLogger } from './helpers/sonosLogger';
 import { Express } from 'express';
 import { VolumeEndpointsService } from './services/volumeEndpoints';
+import { VolumeOptions, ServiceNames } from './models/enums';
+import { DeviceDetails } from './models/models';
 
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;

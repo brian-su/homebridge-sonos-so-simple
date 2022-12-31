@@ -1,18 +1,11 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import {
-    DeviceDetails,
-    FoundDevices,
-    BREAKING_CHANGE_PACKAGE_VERSION,
-    PLATFORM_NAME,
-    PLUGIN_NAME,
-    SOUNDBAR_NAMES,
-    DEFAULT_VOLUME_EXPRESS_PORT,
-} from './constants';
+import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_VOLUME_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
-import { Device } from './@types/sonos-types';
+import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
+import { FoundDevices, DeviceDetails } from './models/models';
 
 /**
  * HomebridgePlatform

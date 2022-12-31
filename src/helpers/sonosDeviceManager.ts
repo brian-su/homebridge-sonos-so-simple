@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
-import { DeviceDetails, DeviceEvents } from '../constants';
 import { Sonos } from 'sonos';
+import { DeviceEvents } from '../models/enums';
+import { DeviceDetails } from '../models/models';
 import { SonosLogger } from './sonosLogger';
 
 export class SonosDeviceManager extends EventEmitter {
