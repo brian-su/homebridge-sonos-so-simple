@@ -6,12 +6,6 @@ If, like me, you've bought a Sonos soundbar (Beam/Arc) and just want to expose a
 
 This package gives you options to control the volume, mute, speech enhancement and night mode via Homebridge with very little config setup.
 
-## Caveats
-
-Homekit doesn't play nicely with speakers. So to get around this you'll be offered the option to treat the volume control as a fan or a lightbulb. The goal being that you can still say 'Hey Siri, set my Beam to 20%' or have a movie scene that cranks the volume up and turns speech enhancement on.
-
-NOTE: Choosing to treat the volume as a lightbulb will cause the volume to mute if you issue commands to turn all the lights off to Siri.
-
 ## Example Configuration
 
 ```
@@ -65,15 +59,19 @@ Eg:
 
 You can make the request using any HTTP verb you want. GET/PUT/POST, pick whatever your heart desires. Technically it should be a PUT but I can't be bothered restricting it in case it causes someone a problem.
 
-### Note & Caveats:
+### Plugin Notes & Caveats:
 
-The port number _could_ change when Homebridge is restarted, but I think this is unlikely. Essentially the plugin will try to grab port 3000, but if it can't it will try to grab the next available port.
+Homekit doesn't play nicely with speakers. So to get around this you'll be offered the option to treat the volume control as a fan or a lightbulb. The goal being that you can still say 'Hey Siri, set my Beam to 20%' or have a movie scene that cranks the volume up and turns speech enhancement on.
+Choosing to treat the volume as a lightbulb will cause the volume to mute if you issue commands to turn all the lights off to Siri.
+
+The port number for the volume endpoints _could_ change when Homebridge is restarted, but I think this is unlikely. Essentially the plugin will try to grab port 3000, but if it can't it will try to grab the next available port.
 There is a chance that a previous setup will output a port number but then after restarting Homebridge that port will be taken. So in this case the plugin will grab another port instead.
 
 I could mitigate this by asking users to pick a port for themselves and then have it in the config and handle the error if the port is in use but I think that adds complexity that sort of ruins the name of "sonos-**so-simple**". If the port changing is becoming a problem for you open up a ticket on the issues tab and I'll have a look at it.
 
-I'm fairly certain the Volume Endpoints feature is an utterly stupid implementation, so if you have a firmer understanding of Homebridge and know of a better way please open up a ticket in the issues tab and let me know.
+Finally, I'm fairly certain that the Volume Endpoints feature is an utterly stupid implementation in this instance, but I came across Avi Millers neat idea and thought it might suit.
+So if you have a firmer understanding of Homebridge and know of a better way please open up a ticket in the issues tab and let me know.
 
 ## References
 
-Thanks to Avi Miller and his [repo](https://github.com/djelibeybi/homebridge-button-platform) for the idea for the Volume Endpoints feature.
+Thanks to Avi Miller and his [repo](https://github.com/djelibeybi/homebridge-button-platform) for the idea for implementing the Volume Endpoints feature.
