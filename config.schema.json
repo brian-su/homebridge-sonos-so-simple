@@ -30,6 +30,11 @@
                     { "title": "Fan", "enum": ["fan"] }
                 ],
                 "required": true
+            },
+            "volumeControlEndpoints": {
+                "title": "Offer endpoints to change volume up and down",
+                "type": "boolean",
+                "default": false
             }
         }
     }

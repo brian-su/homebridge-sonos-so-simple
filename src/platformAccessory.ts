@@ -8,12 +8,13 @@ import { MuteService } from './services/mute';
 import { SpeechEnhancementService } from './services/speechEnhancement';
 import { NightModeService } from './services/nightMode';
 import { SonosLogger } from './helpers/sonosLogger';
-import { VolumeButtonService } from './services/volumeButton';
+import { Express } from 'express';
+import { VolumeEndpointsService } from './services/volumeEndpoints';
 
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;
 
-    constructor(platform: SonosPlatform, accessory: PlatformAccessory) {
+    constructor(platform: SonosPlatform, accessory: PlatformAccessory, volumeExpressApp: Express | null) {
         this.accessory = accessory;
         const deviceDetails = accessory.context.device as DeviceDetails;
         const sonosDevice = new Sonos(deviceDetails.Host);
@@ -55,8 +56,9 @@ export class SonosPlatformAccessory {
             this.removeOldService(ServiceNames.NightModeService);
         }
 
-        // new VolumeButtonService(platform, accessory, manager, ServiceNames.UpButtonService, displayOrder++);
-        // new VolumeButtonService(platform, accessory, manager, ServiceNames.DownButtonService, displayOrder++);
+        if (volumeExpressApp) {
+            new VolumeEndpointsService(volumeExpressApp, deviceDetails, manager, logger);
+        }
     }
 
     private removeOldService(name: string) {

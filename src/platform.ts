@@ -3,6 +3,9 @@ import { DeviceDetails, FoundDevices, BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './@types/sonos-types';
+import express, { Express } from 'express';
+import detect from 'detect-port';
+
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -16,6 +19,8 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
+    private volumeExpressApp: Express | null = null;
+    private volumeExpressUri: string = '';
 
     constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -46,9 +51,24 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.info('Getting Devices');
         let asyncDiscovery = new AsyncDeviceDiscovery();
 
-        let sonosDevices: Device[] = await asyncDiscovery.discoverMultiple();
+        let sonosDevices: Device[];
+        try {
+            sonosDevices = await asyncDiscovery.discoverMultiple();
+        } catch (error: any) {
+            this.log.error(error.message);
+            return;
+        }
 
         this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
+
+        if (this.config.volumeControlEndpoints) {
+            try {
+                this.volumeExpressApp = await this.setupExpressApp();
+            } catch (error: any) {
+                this.log.error(error.message);
+                return;
+            }
+        }
 
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
@@ -76,7 +96,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         if (existingAccessory) {
             this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
             existingAccessory.displayName = deviceDisplayName;
-            new SonosPlatformAccessory(this, existingAccessory);
+            new SonosPlatformAccessory(this, existingAccessory, this.volumeExpressApp);
             this.api.updatePlatformAccessories([existingAccessory]);
             return;
         }
@@ -90,8 +110,11 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             SerialNumber: description.serialNum,
             ModelName: description.modelName,
             FirmwareVersion: description.softwareVersion,
+            RoomName: description.roomName,
+            DisplayName: description.displayName,
+            VolumeExpressUri: this.volumeExpressUri,
         } as DeviceDetails;
-        new SonosPlatformAccessory(this, accessory);
+        new SonosPlatformAccessory(this, accessory, this.volumeExpressApp);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
@@ -103,11 +126,40 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             return this.foundDevices.map((x) => x.uuid).indexOf(accessory.UUID) === -1;
         });
 
+        if (removedAccessories.length > 0) this.log.info('Now removing devices registered with homebridge but not discovered from Sonos');
+
         removedAccessories.forEach((accessory) => {
             let deviceDetails = accessory.context.device as DeviceDetails;
-            this.log.info(`Removing ${deviceDetails.Host}`);
+            this.log.info(`Removing ${deviceDetails.ModelName} ${deviceDetails.Host}`);
         });
 
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
+    }
+
+    async setupExpressApp(): Promise<Express> {
+        this.log.info('Server Setting up');
+        var targetPort = 8581;
+        var actualPort = 0;
+        var loopCount = 0;
+
+        //Loop to find an available port.
+        while (targetPort !== actualPort) {
+            if (loopCount > 100) throw Error('Volume Endpoints unavailable: Tried 100 ports, got nada, gave up. Sorry.');
+
+            var portReturn = await detect(targetPort);
+            targetPort === portReturn ? (actualPort = portReturn) : (targetPort = portReturn);
+            this.log.debug(`Target: ${targetPort}, Actual: ${actualPort}`);
+
+            loopCount++;
+        }
+
+        var app = express();
+        app.listen(actualPort, () => {
+            this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
+        });
+
+        this.volumeExpressUri = `{{YOUR_HOMEBRIDGE_ADDRESS}}:${actualPort}`;
+
+        return app;
     }
 }

@@ -35,8 +35,24 @@ export class SonosDeviceManager extends EventEmitter {
         });
     }
 
-    public volumeUp() {
-        this.log.logInfo('Triggered GET ProgrammableSwitchEvent');
+    public async volumeUp(increment: number) {
+        this.log.logDebug(`Triggered VolumeUp - ${increment}`);
+        var current = await this.sonosDevice.getVolume();
+
+        var newVolume = current + increment;
+        if (newVolume > 100) newVolume = 100;
+
+        this.sonosDevice.setVolume(newVolume);
+    }
+
+    public async volumeDown(decrement: number) {
+        this.log.logDebug(`Triggered VolumeDown - ${decrement}`);
+        var current = await this.sonosDevice.getVolume();
+
+        var newVolume = current - decrement;
+        if (newVolume < 0) newVolume = 0;
+
+        this.sonosDevice.setVolume(newVolume);
     }
 
     public async getMuted(): Promise<boolean> {
