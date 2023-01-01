@@ -1,7 +1,7 @@
 {
     "displayName": "Sonos So Simple",
     "name": "homebridge-sonos-so-simple",
-    "version": "0.3.0",
+    "version": "0.3.0-beta1",
     "description": "A very simple plugin for controlling Sonos devices via Homebridge.",
     "license": "MIT",
     "repository": {
