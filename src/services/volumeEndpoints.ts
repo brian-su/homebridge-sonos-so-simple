@@ -17,7 +17,7 @@ export class VolumeEndpointsService {
         this.app = expressApp;
         this.roomName = deviceDetails.RoomName.replace(' ', '');
         this.modelName = deviceDetails.DisplayName.replace(' ', '');
-        this.port = deviceDetails.VolumeExpressPort;
+        this.port = deviceDetails.ExpressAppPort;
         this.device = sonosDevice;
         this.logger = logger;
 
