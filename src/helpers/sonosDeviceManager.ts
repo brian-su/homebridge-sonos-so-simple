@@ -1,9 +1,10 @@
 import EventEmitter from 'events';
-import { DeviceDetails, DeviceEvents } from './constants';
 import { Sonos } from 'sonos';
+import { DeviceEvents } from '../models/enums';
+import { DeviceDetails } from '../models/models';
 import { SonosLogger } from './sonosLogger';
 
-export class PlatformDeviceManager extends EventEmitter {
+export class SonosDeviceManager extends EventEmitter {
     private sonosDevice: Sonos;
     private log: SonosLogger;
 
@@ -21,7 +22,6 @@ export class PlatformDeviceManager extends EventEmitter {
             if (data.Volume) {
                 var master = data.Volume.find((x) => x.channel === 'Master');
                 this.log.logDebug(`VOLUME EVENT ${master.val}`);
-
                 this.emit(DeviceEvents.DeviceVolumeUpdate, master.val as number);
             }
 
@@ -34,6 +34,26 @@ export class PlatformDeviceManager extends EventEmitter {
                 this.emit(DeviceEvents.NightModeUpdate, data.NightMode.val as number);
             }
         });
+    }
+
+    public async volumeUp(increment: number) {
+        this.log.logDebug(`Triggered VolumeUp - ${increment}`);
+        var current = await this.sonosDevice.getVolume();
+
+        var newVolume = current + increment;
+        if (newVolume > 100) newVolume = 100;
+
+        this.sonosDevice.setVolume(newVolume);
+    }
+
+    public async volumeDown(decrement: number) {
+        this.log.logDebug(`Triggered VolumeDown - ${decrement}`);
+        var current = await this.sonosDevice.getVolume();
+
+        var newVolume = current - decrement;
+        if (newVolume < 0) newVolume = 0;
+
+        this.sonosDevice.setVolume(newVolume);
     }
 
     public async getMuted(): Promise<boolean> {

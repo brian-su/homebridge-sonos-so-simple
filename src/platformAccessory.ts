@@ -1,47 +1,69 @@
 import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
 import { Sonos } from 'sonos';
-import { DeviceDetails, DeviceEvents } from './constants';
-import { SonosLogger } from './sonosLogger';
-import { PlatformDeviceManager } from './platformDeviceManager';
+import { SonosDeviceManager } from './helpers/sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
 import { SpeechEnhancementService } from './services/speechEnhancement';
 import { NightModeService } from './services/nightMode';
+import { SonosLogger } from './helpers/sonosLogger';
+import { Express } from 'express';
+import { VolumeEndpointsService } from './services/volumeEndpoints';
+import { VolumeOptions, ServiceNames } from './models/enums';
+import { DeviceDetails } from './models/models';
 
 export class SonosPlatformAccessory {
-    private sonosDevice: Sonos;
-    private logger: SonosLogger;
+    private readonly accessory: PlatformAccessory;
 
-    constructor(private readonly platform: SonosPlatform, private readonly accessory: PlatformAccessory) {
-        let deviceDetails = accessory.context.device as DeviceDetails;
-        this.sonosDevice = new Sonos(deviceDetails.Host);
-        this.logger = new SonosLogger(deviceDetails.ModelName, this.platform.log);
+    constructor(platform: SonosPlatform, accessory: PlatformAccessory, volumeExpressApp: Express | null) {
+        this.accessory = accessory;
+        const deviceDetails = accessory.context.device as DeviceDetails;
+        const sonosDevice = new Sonos(deviceDetails.Host);
+        const logger = new SonosLogger(deviceDetails.ModelName, platform.log);
 
         // set accessory information
-        this.accessory
-            .getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, deviceDetails.Manufacturer)
-            .setCharacteristic(this.platform.Characteristic.Model, deviceDetails.ModelName)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, deviceDetails.SerialNumber)
-            .setCharacteristic(this.platform.Characteristic.FirmwareRevision, deviceDetails.FirmwareVersion);
+        accessory
+            .getService(platform.Service.AccessoryInformation)!
+            .setCharacteristic(platform.Characteristic.Manufacturer, deviceDetails.Manufacturer)
+            .setCharacteristic(platform.Characteristic.Model, deviceDetails.ModelName)
+            .setCharacteristic(platform.Characteristic.SerialNumber, deviceDetails.SerialNumber)
+            .setCharacteristic(platform.Characteristic.FirmwareRevision, deviceDetails.FirmwareVersion);
 
-        var manager = new PlatformDeviceManager(this.sonosDevice, this.logger, deviceDetails);
+        var manager = new SonosDeviceManager(sonosDevice, logger, deviceDetails);
 
         let displayOrder = 1;
-        const volumeControls = new VolumeControlService(platform, accessory, manager, displayOrder++);
-        new MuteService(platform, accessory, manager, displayOrder++);
-        const speechEnhancementService = deviceDetails.IsSoundBar ? new SpeechEnhancementService(platform, accessory, manager, displayOrder++) : null;
-        const nightModeService = deviceDetails.IsSoundBar ? new NightModeService(platform, accessory, manager, displayOrder++) : null;
 
-        manager.on(DeviceEvents.DeviceVolumeUpdate, (volume: number) => {
-            volumeControls.updateCharacteristic(volume);
-        });
-        manager.on(DeviceEvents.SpeechEnhancementUpdate, (speech: number) => {
-            speechEnhancementService?.updateCharacteristic(speech);
-        });
-        manager.on(DeviceEvents.NightModeUpdate, (nightMode: number) => {
-            nightModeService?.updateCharacteristic(nightMode);
-        });
+        if (platform.config.volume !== VolumeOptions.None) {
+            new VolumeControlService(platform, accessory, manager, displayOrder++);
+        } else {
+            this.removeOldService(ServiceNames.VolumeService);
+        }
+
+        if (platform.config.muteSwitch) {
+            new MuteService(platform, accessory, manager, displayOrder++);
+        } else {
+            this.removeOldService(ServiceNames.MuteService);
+        }
+
+        if (deviceDetails.IsSoundBar) {
+            new SpeechEnhancementService(platform, accessory, manager, displayOrder++);
+        } else {
+            this.removeOldService(ServiceNames.SpeechEnhancementService);
+        }
+
+        if (deviceDetails.IsSoundBar) {
+            new NightModeService(platform, accessory, manager, displayOrder++);
+        } else {
+            this.removeOldService(ServiceNames.NightModeService);
+        }
+
+        if (volumeExpressApp) {
+            new VolumeEndpointsService(volumeExpressApp, deviceDetails, manager, logger);
+        }
+    }
+
+    private removeOldService(name: string) {
+        let oldService = this.accessory.getService(name);
+        if (oldService) this.accessory.removeService(oldService);
     }
 }

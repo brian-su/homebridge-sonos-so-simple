@@ -2,6 +2,19 @@
 
 Changes to the repo are noted here:
 
+## 0.3.0 - 2023-01-02
+
+### Features:
+
+Adds Volume Control increment/decrement via HTTP calls that can be hooked up via shortcuts and or buttons.
+Full explanation [here](https://github.com/brian-su/homebridge-sonos-so-simple#volume-control-endpoints)
+
+Minimum Node version supported is now 14 to match Homebridge minimum support.
+
+### Bug Fixes:
+
+Generally better error handling if the plugin can't find any devices for whatever reason.
+
 ## 0.2.6 - 2022-12-29
 
 ### Bug Fixes:

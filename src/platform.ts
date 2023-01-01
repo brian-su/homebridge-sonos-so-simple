@@ -1,9 +1,12 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { DeviceDetails, FoundDevices, PLATFORM_NAME, PLUGIN_NAME } from './constants';
+import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_VOLUME_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
-import { Device } from './@types/sonos-types';
-import { PACKAGE_VERSION } from './version';
+import { Device } from './models/sonos-types';
+import express, { Express } from 'express';
+import detect from 'detect-port';
+import { FoundDevices, DeviceDetails } from './models/models';
+
 /**
  * HomebridgePlatform
  * This class is the main constructor for your plugin, this is where you should
@@ -15,9 +18,10 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
-    private readonly soundbars = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
+    private volumeExpressApp: Express | null = null;
+    private volumeExpressPort: number | undefined;
 
     constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -48,9 +52,24 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.info('Getting Devices');
         let asyncDiscovery = new AsyncDeviceDiscovery();
 
-        let sonosDevices: Device[] = await asyncDiscovery.discoverMultiple();
+        let sonosDevices: Device[];
+        try {
+            sonosDevices = await asyncDiscovery.discoverMultiple();
+        } catch (error: any) {
+            this.log.error(error.message);
+            return;
+        }
 
         this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
+
+        if (this.config.volumeControlEndpoints) {
+            try {
+                this.volumeExpressApp = await this.setupExpressApp();
+            } catch (error: any) {
+                this.log.error(error.message);
+                return;
+            }
+        }
 
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
@@ -64,13 +83,13 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         let description = await device.deviceDescription();
         let displayNameUpperCase = description.displayName.toUpperCase();
-        let IsSoundBar = this.soundbars.includes(displayNameUpperCase);
+        let IsSoundBar = SOUNDBAR_NAMES.includes(displayNameUpperCase);
 
         if (this.config.soundbarsOnly && !IsSoundBar) return;
 
         let deviceDisplayName = this.config.roomNameAsName ? description.roomName : description.displayName;
 
-        const uuid = this.api.hap.uuid.generate(`${description.MACAddress}:${PACKAGE_VERSION}`);
+        const uuid = this.api.hap.uuid.generate(`${description.MACAddress}:${BREAKING_CHANGE_PACKAGE_VERSION}`);
         this.foundDevices.push({ uuid: uuid, name: deviceDisplayName });
         this.log.debug(`Found device - UUID is : ${uuid}`);
         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
@@ -78,7 +97,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         if (existingAccessory) {
             this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
             existingAccessory.displayName = deviceDisplayName;
-            new SonosPlatformAccessory(this, existingAccessory);
+            new SonosPlatformAccessory(this, existingAccessory, this.volumeExpressApp);
             this.api.updatePlatformAccessories([existingAccessory]);
             return;
         }
@@ -92,8 +111,11 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             SerialNumber: description.serialNum,
             ModelName: description.modelName,
             FirmwareVersion: description.softwareVersion,
+            RoomName: description.roomName,
+            DisplayName: description.displayName,
+            VolumeExpressPort: this.volumeExpressPort,
         } as DeviceDetails;
-        new SonosPlatformAccessory(this, accessory);
+        new SonosPlatformAccessory(this, accessory, this.volumeExpressApp);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
@@ -105,11 +127,40 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             return this.foundDevices.map((x) => x.uuid).indexOf(accessory.UUID) === -1;
         });
 
+        if (removedAccessories.length > 0) this.log.info('Now removing devices registered with homebridge but not discovered from Sonos');
+
         removedAccessories.forEach((accessory) => {
             let deviceDetails = accessory.context.device as DeviceDetails;
-            this.log.info(`Removing ${deviceDetails.Host}`);
+            this.log.info(`Removing ${deviceDetails.ModelName} ${deviceDetails.Host}`);
         });
 
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
+    }
+
+    async setupExpressApp(): Promise<Express> {
+        this.log.info('Server Setting up');
+        var targetPort = DEFAULT_VOLUME_EXPRESS_PORT;
+        var actualPort = 0;
+        var loopCount = 0;
+
+        //Loop to find an available port.
+        while (targetPort !== actualPort) {
+            if (loopCount > 100) throw Error('Volume Endpoints unavailable: Tried 100 ports, got nada, gave up. Sorry.');
+
+            var portReturn = await detect(targetPort);
+            targetPort === portReturn ? (actualPort = portReturn) : (targetPort = portReturn);
+            this.log.debug(`Target: ${targetPort}, Actual: ${actualPort}`);
+
+            loopCount++;
+        }
+
+        var app = express();
+        app.listen(actualPort, () => {
+            this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
+        });
+
+        this.volumeExpressPort = actualPort;
+
+        return app;
     }
 }
