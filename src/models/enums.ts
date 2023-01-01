@@ -1,13 +1,13 @@
 export enum VolumeOptions {
     None = 'none',
     Lightbulb = 'bulb',
-    Fan = 'fan',
+    Fan = 'fan'
 }
 
 export enum DeviceEvents {
     DeviceVolumeUpdate = 'DeviceVolumeUpdate',
     SpeechEnhancementUpdate = 'SpeechEnhancementUpdate',
-    NightModeUpdate = 'NightModeUpdate',
+    NightModeUpdate = 'NightModeUpdate'
 }
 
 export enum ServiceNames {
@@ -16,5 +16,5 @@ export enum ServiceNames {
     SpeechEnhancementService = 'Speech Enhancement',
     NightModeService = 'Night Mode',
     UpButtonService = 'Up Button',
-    DownButtonService = 'Down Button',
+    DownButtonService = 'Down Button'
 }

@@ -17,7 +17,7 @@
     },
     "main": "dist/index.js",
     "scripts": {
-        "pretty": "prettier --write 'src/*.ts' 'src/*/*.ts' '*.json' ",
+        "pretty": "prettier --config .prettierrc 'src/**/*.ts' '*.json' --write",
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",
         "prepublishOnly": "npm run build",
