@@ -1,3 +1,8 @@
+[![Build and Lint](https://github.com/brian-su/homebridge-sonos-so-simple/actions/workflows/build.yml/badge.svg)](https://github.com/brian-su/homebridge-sonos-so-simple/actions/workflows/build.yml)
+[![npm](https://img.shields.io/npm/v/homebridge-sonos-so-simple.svg)](https://www.npmjs.com/package/homebridge-sonos-so-simple)
+[![npm](https://img.shields.io/npm/dt/homebridge-sonos-so-simple.svg)](https://www.npmjs.com/package/homebridge-sonos-so-simple)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 # Homebridge Sonos So Simple
 
 ## What does it do?
@@ -31,7 +36,7 @@ Either search via the Homebridge config for homebridge-sonos-so-simple
 npm install homebridge-sonos-so-simple -g
 ```
 
-Once installed update the config, again using the config ui or using the example config above. Remember to remove the comment (//Options here are bulb/fan/none)
+Once installed update the config, again using the config ui or using the example config above.
 
 ## Volume Control Endpoints
 

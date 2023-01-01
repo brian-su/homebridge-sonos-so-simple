@@ -3,7 +3,7 @@
     "name": "homebridge-sonos-so-simple",
     "version": "0.3.0",
     "description": "A very simple plugin for controlling Sonos devices via Homebridge.",
-    "license": "Apache-2.0",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "git://github.com/brian-su/homebridge-sonos-so-simple.git"
