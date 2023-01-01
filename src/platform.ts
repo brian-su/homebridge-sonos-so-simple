@@ -1,11 +1,5 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import {
-    BREAKING_CHANGE_PACKAGE_VERSION,
-    PLATFORM_NAME,
-    PLUGIN_NAME,
-    SOUNDBAR_NAMES,
-    DEFAULT_VOLUME_EXPRESS_PORT as DEFAULT_EXPRESS_PORT,
-} from './models/constants';
+import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './models/sonos-types';
@@ -121,7 +115,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             FirmwareVersion: description.softwareVersion,
             RoomName: description.roomName,
             DisplayName: description.displayName,
-            ExpressAppPort: this.expressAppPort,
+            ExpressAppPort: this.expressAppPort
         } as DeviceDetails;
         new SonosPlatformAccessory(this, accessory, this.expressApp);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
