@@ -6,6 +6,7 @@ import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
 import { FoundDevices, DeviceDetails } from './models/models';
+import helmet from 'helmet';
 
 /**
  * HomebridgePlatform
@@ -160,6 +161,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         app.listen(actualPort, () => {
             this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
         });
+        app.use(helmet());
 
         this.expressAppPort = actualPort;
 
