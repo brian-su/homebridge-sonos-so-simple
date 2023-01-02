@@ -15,7 +15,7 @@ import { DeviceDetails } from './models/models';
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;
 
-    constructor(platform: SonosPlatform, accessory: PlatformAccessory, volumeExpressApp: Express | null) {
+    constructor(platform: SonosPlatform, accessory: PlatformAccessory, expressApp: Express | null) {
         this.accessory = accessory;
         const deviceDetails = accessory.context.device as DeviceDetails;
         const sonosDevice = new Sonos(deviceDetails.Host);
@@ -57,8 +57,19 @@ export class SonosPlatformAccessory {
             this.removeOldService(ServiceNames.NightModeService);
         }
 
-        if (volumeExpressApp) {
-            new VolumeEndpointsService(volumeExpressApp, deviceDetails, manager, logger);
+        if (expressApp) {
+            new VolumeEndpointsService(expressApp, deviceDetails, manager, logger);
+
+            // These have to be registered after the correct routes
+            // 404 handler
+            expressApp.use((req, res, next) => {
+                return res.status(404).send({ message: 'The route - ' + req.url + '  was not found.' });
+            });
+
+            // 500 handler
+            expressApp.use((err, req, res, next) => {
+                return res.status(500).send({ error: err });
+            });
         }
     }
 

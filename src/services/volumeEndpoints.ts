@@ -15,9 +15,10 @@ export class VolumeEndpointsService {
 
     constructor(expressApp: Express, deviceDetails: DeviceDetails, sonosDevice: SonosDeviceManager, logger: SonosLogger) {
         this.app = expressApp;
-        this.roomName = deviceDetails.RoomName.replace(' ', '');
-        this.modelName = deviceDetails.DisplayName.replace(' ', '');
-        this.port = deviceDetails.VolumeExpressPort;
+        //Make the string URL compliant as per https://stackoverflow.com/a/8485137
+        this.roomName = deviceDetails.RoomName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        this.modelName = deviceDetails.DisplayName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        this.port = deviceDetails.ExpressAppPort;
         this.device = sonosDevice;
         this.logger = logger;
 

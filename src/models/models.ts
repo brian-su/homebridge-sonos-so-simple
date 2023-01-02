@@ -12,5 +12,5 @@ export type DeviceDetails = {
     FirmwareVersion: string;
     RoomName: string;
     DisplayName: string;
-    VolumeExpressPort: number;
+    ExpressAppPort: number;
 };

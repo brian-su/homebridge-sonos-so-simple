@@ -1,11 +1,12 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_VOLUME_EXPRESS_PORT } from './models/constants';
+import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
 import { FoundDevices, DeviceDetails } from './models/models';
+import helmet from 'helmet';
 
 /**
  * HomebridgePlatform
@@ -20,8 +21,8 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
-    private volumeExpressApp: Express | null = null;
-    private volumeExpressPort: number | undefined;
+    private expressApp: Express | null = null;
+    private expressAppPort: number | undefined;
 
     constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -64,13 +65,15 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         if (this.config.volumeControlEndpoints) {
             try {
-                this.volumeExpressApp = await this.setupExpressApp();
+                this.expressApp = await this.setupExpressApp();
             } catch (error: any) {
                 this.log.error(error.message);
                 return;
             }
         }
 
+        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's on func generation so doesn't know to wait for the others
+        //Basically just don't refactor this thinking you're smart Brian. I see you.
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
         }
@@ -97,7 +100,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         if (existingAccessory) {
             this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
             existingAccessory.displayName = deviceDisplayName;
-            new SonosPlatformAccessory(this, existingAccessory, this.volumeExpressApp);
+            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
             this.api.updatePlatformAccessories([existingAccessory]);
             return;
         }
@@ -113,9 +116,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             FirmwareVersion: description.softwareVersion,
             RoomName: description.roomName,
             DisplayName: description.displayName,
-            VolumeExpressPort: this.volumeExpressPort,
+            ExpressAppPort: this.expressAppPort
         } as DeviceDetails;
-        new SonosPlatformAccessory(this, accessory, this.volumeExpressApp);
+        new SonosPlatformAccessory(this, accessory, this.expressApp);
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
@@ -138,14 +141,14 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     }
 
     async setupExpressApp(): Promise<Express> {
-        this.log.info('Server Setting up');
-        var targetPort = DEFAULT_VOLUME_EXPRESS_PORT;
+        this.log.info('Setting up Express server');
+        var targetPort = DEFAULT_EXPRESS_PORT;
         var actualPort = 0;
         var loopCount = 0;
 
         //Loop to find an available port.
         while (targetPort !== actualPort) {
-            if (loopCount > 100) throw Error('Volume Endpoints unavailable: Tried 100 ports, got nada, gave up. Sorry.');
+            if (loopCount > 100) throw Error('Volume Endpoints feature unavailable: Tried 100 ports, got nada, gave up. Sorry.');
 
             var portReturn = await detect(targetPort);
             targetPort === portReturn ? (actualPort = portReturn) : (targetPort = portReturn);
@@ -158,8 +161,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         app.listen(actualPort, () => {
             this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
         });
+        app.use(helmet());
 
-        this.volumeExpressPort = actualPort;
+        this.expressAppPort = actualPort;
 
         return app;
     }
