@@ -35,6 +35,11 @@
                 "title": "Offer endpoints to change volume up and down",
                 "type": "boolean",
                 "default": false
+            },
+            "preserveVolumeOnInputSwitch": {
+                "title": "A Title",
+                "type": "boolean",
+                "default": false
             }
         }
     }

@@ -11,6 +11,7 @@ import { Express } from 'express';
 import { VolumeEndpointsService } from './services/volumeEndpoints';
 import { VolumeOptions, ServiceNames } from './models/enums';
 import { DeviceDetails } from './models/models';
+import { AudioSwitchService } from './services/audioSwitch';
 
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;
@@ -70,6 +71,12 @@ export class SonosPlatformAccessory {
             expressApp.use((err, req, res, next) => {
                 return res.status(500).send({ error: err });
             });
+        }
+
+        if (platform.config.preserveVolumeOnInputSwitch) {
+            new AudioSwitchService(manager, logger);
+        } else {
+            this.removeOldService(ServiceNames.AudioSwitchService);
         }
     }
 
