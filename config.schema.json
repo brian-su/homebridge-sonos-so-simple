@@ -37,7 +37,7 @@
                 "default": false
             },
             "preserveVolumeOnInputSwitch": {
-                "title": "Preserve previous volume level for each input type (tv, music etc)",
+                "title": "Preserve last known volume level for each input type (tv, music etc)",
                 "type": "boolean",
                 "default": false
             }
