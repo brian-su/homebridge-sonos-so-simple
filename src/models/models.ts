@@ -14,3 +14,8 @@ export type DeviceDetails = {
     DisplayName: string;
     ExpressAppPort: number;
 };
+
+export type AudioInputModel = {
+    InputUri: string;
+    Volume: number;
+};

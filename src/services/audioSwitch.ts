@@ -1,31 +1,53 @@
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { SonosLogger } from '../helpers/sonosLogger';
 import { DeviceEvents } from '../models/enums';
+import { AudioInputModel } from '../models/models';
 import { AVTransportEvent } from '../models/sonos-types';
 
 export class AudioSwitchService {
     private device: SonosDeviceManager;
     private logger: SonosLogger;
 
-    private tvVolume: number | undefined;
-    private musicVolume: number | undefined;
+    private inputTypes: AudioInputModel[] = [];
+    private previousUri: string | undefined;
 
     constructor(sonosDevice: SonosDeviceManager, logger: SonosLogger) {
         this.device = sonosDevice;
         this.logger = logger;
 
         this.device.on(DeviceEvents.AudioSwitched, (data: AVTransportEvent) => {
-            this.logger.logDebug(JSON.stringify(data));
+            if (data.CurrentTrackMetaDataParsed === undefined) return;
 
-            var currentVolume = this.device.getVolume();
+            const currentVolume = this.device.getVolume();
+            const inputUri = data.CurrentTrackMetaDataParsed.uri;
+            const currentSettings = this.inputTypes.find((x) => x.InputUri === inputUri);
 
-            if (data.CurrentTrackMetaDataParsed.artist) {
-                this.tvVolume = currentVolume;
-                if (this.musicVolume) this.device.setVolume(this.musicVolume);
+            this.logger.logDebug(`Input details ${JSON.stringify(data)}`);
+            this.logger.logDebug(`Input metadata ${JSON.stringify(data.CurrentTrackMetaDataParsed)}`);
+            this.logger.logInfo(`Current Input Uri: ${data.CurrentTrackMetaDataParsed.uri}`);
+
+            this.saveVolumeForPreviousInput(currentVolume);
+
+            if (currentSettings) {
+                this.device.setVolume(currentSettings.Volume);
             } else {
-                this.musicVolume = currentVolume;
-                if (this.tvVolume) this.device.setVolume(this.tvVolume);
+                this.inputTypes.push({ InputUri: inputUri, Volume: currentVolume });
             }
+
+            this.previousUri = inputUri;
         });
+    }
+
+    private saveVolumeForPreviousInput(volume: number) {
+        if (this.previousUri === undefined) return;
+
+        const inputIndex = this.inputTypes.findIndex((x) => x.InputUri === this.previousUri);
+        const updatedInputVolume = { InputUri: this.previousUri, Volume: volume } as AudioInputModel;
+
+        if (inputIndex === -1) {
+            this.inputTypes.push(updatedInputVolume);
+        } else {
+            this.inputTypes[inputIndex] = updatedInputVolume;
+        }
     }
 }
