@@ -24,7 +24,6 @@ export class AudioSwitchService {
 
             this.logger.logDebug(`Input details ${JSON.stringify(data)}`);
             this.logger.logDebug(`Input metadata ${JSON.stringify(data.CurrentTrackMetaDataParsed)}`);
-            this.logger.logInfo(`Current Input Uri: ${data.CurrentTrackMetaDataParsed.uri}`);
 
             this.saveVolumeForPreviousInput(currentVolume);
 
