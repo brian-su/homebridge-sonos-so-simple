@@ -20,7 +20,7 @@ export class SonosPlatformAccessory {
         this.accessory = accessory;
         const deviceDetails = accessory.context.device as DeviceDetails;
         const sonosDevice = new Sonos(deviceDetails.Host);
-        const logger = new SonosLogger(deviceDetails.ModelName, platform.log);
+        const logger = new SonosLogger(deviceDetails.ModelName, deviceDetails.RoomName, platform.log);
 
         // set accessory information
         accessory
@@ -74,7 +74,7 @@ export class SonosPlatformAccessory {
         }
 
         if (platform.config.preserveVolumeOnInputSwitch) {
-            new AudioSwitchService(manager, logger);
+            new AudioSwitchService(manager, deviceDetails.Host, logger);
         } else {
             this.removeOldService(ServiceNames.AudioSwitchService);
         }

@@ -122,3 +122,5 @@ dist
 
 .vscode
 .DS_Store
+
+*_audioInputVolumes.json

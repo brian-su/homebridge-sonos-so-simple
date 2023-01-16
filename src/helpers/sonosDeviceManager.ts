@@ -83,8 +83,8 @@ export class SonosDeviceManager extends EventEmitter {
         }
     }
 
-    public getVolume(): number {
-        return this.sonosDevice.getVolume();
+    public async getVolume(): Promise<number> {
+        return await this.sonosDevice.getVolume();
     }
 
     public setVolume(value: number) {
