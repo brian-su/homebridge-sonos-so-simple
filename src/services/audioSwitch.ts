@@ -44,18 +44,20 @@ export class AudioSwitchService {
             });
         }
 
-        this.device.on(DeviceEvents.AudioSwitched, (data) => this.handleAudioSwitched(data));
+        //Unsure about the async/await being needed here
+        this.device.on(DeviceEvents.AudioSwitched, async (data) => await this.handleAudioSwitched(data));
     }
 
     private async handleAudioSwitched(data: AVTransportEvent) {
         if (data.CurrentTrackMetaDataParsed === undefined) return;
 
         const currentVolume = await this.device.getVolume();
-        const inputUri = data.CurrentTrackMetaDataParsed.uri;
+        const inputUri = this.parseUri(data.CurrentTrackMetaDataParsed.uri);
         const currentSettings = this.audioInputVolumes.find((x) => x.InputUri === inputUri);
 
         this.logger.logDebug(`Current volume ${currentVolume}`);
         this.logger.logDebug(`Current settings ${JSON.stringify(currentSettings)}`);
+        this.logger.logDebug(`Current uri ${inputUri}`);
         this.logger.logDebug(`Input details ${JSON.stringify(data)}`);
         this.logger.logDebug(`Input metadata ${JSON.stringify(data.CurrentTrackMetaDataParsed)}`);
 
@@ -87,5 +89,11 @@ export class AudioSwitchService {
                 this.logger.logError('Error saving to audio input file. Volume levels may not be preserved when you switch inputs');
             }
         });
+    }
+
+    private parseUri(uri: string): string {
+        var colonIndex = uri.indexOf(':');
+
+        return uri.substring(0, colonIndex);
     }
 }

@@ -72,7 +72,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             }
         }
 
-        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's on func generation so doesn't know to wait for the others
+        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's own func generation so doesn't know to wait for the others
         //Basically just don't refactor this thinking you're smart Brian. I see you.
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
