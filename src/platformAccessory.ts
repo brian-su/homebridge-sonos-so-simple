@@ -74,7 +74,7 @@ export class SonosPlatformAccessory {
         }
 
         if (platform.config.preserveVolumeOnInputSwitch) {
-            new AudioSwitchService(manager, deviceDetails.Host, logger);
+            new AudioSwitchService(manager, deviceDetails, logger);
         } else {
             this.removeOldService(ServiceNames.AudioSwitchService);
         }

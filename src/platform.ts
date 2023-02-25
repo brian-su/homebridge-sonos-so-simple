@@ -5,7 +5,7 @@ import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
-import { FoundDevices, DeviceDetails } from './models/models';
+import { FoundDevices, DeviceDetails, AudioInputModel } from './models/models';
 import helmet from 'helmet';
 
 /**
@@ -97,17 +97,8 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.debug(`Found device - UUID is : ${uuid}`);
         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
-        if (existingAccessory) {
-            this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
-            existingAccessory.displayName = deviceDisplayName;
-            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
-            this.api.updatePlatformAccessories([existingAccessory]);
-            return;
-        }
-
-        this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
-        const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
-        accessory.context.device = {
+        const deviceDetailsModel = {
+            UUID: uuid,
             Host: device.host,
             IsSoundBar: IsSoundBar,
             Manufacturer: description.manufacturer,
@@ -116,12 +107,40 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             FirmwareVersion: description.softwareVersion,
             RoomName: description.roomName,
             DisplayName: description.displayName,
-            ExpressAppPort: this.expressAppPort
+            ExpressAppPort: this.expressAppPort,
+            AudioInputVolumes: [],
+            UpdateAudioVolumes: this.updateInputVolumeLevels.bind(this)
         } as DeviceDetails;
 
+        if (existingAccessory) {
+            this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
+            existingAccessory.displayName = deviceDisplayName;
+            deviceDetailsModel.AudioInputVolumes = existingAccessory.context.device.AudioInputVolumes;
+            existingAccessory.context.device = deviceDetailsModel;
+            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
+
+            this.log.info(`EXISTING DEVICE DETAILS: ${JSON.stringify(existingAccessory.context.device.AudioInputVolumes)}`);
+
+            this.api.updatePlatformAccessories([existingAccessory]);
+            return;
+        }
+
+        this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
+        const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
+        accessory.context.device = deviceDetailsModel;
         new SonosPlatformAccessory(this, accessory, this.expressApp);
 
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    }
+
+    private updateInputVolumeLevels(uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) {
+        const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+        if (!existingAccessory) return;
+
+        const currentIndex = currentSavedSettings.findIndex((x) => x.InputUri === currentSettings.InputUri);
+        currentIndex === -1 ? currentSavedSettings.push(currentSettings) : (currentSavedSettings[currentIndex] = currentSettings);
+
+        this.api.updatePlatformAccessories([existingAccessory]);
     }
 
     removeDevicesNotDiscovered() {

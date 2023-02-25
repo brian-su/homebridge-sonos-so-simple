@@ -4,6 +4,7 @@ export type FoundDevices = {
 };
 
 export type DeviceDetails = {
+    UUID: string;
     Host: string;
     IsSoundBar: boolean;
     Manufacturer: string;
@@ -13,6 +14,8 @@ export type DeviceDetails = {
     RoomName: string;
     DisplayName: string;
     ExpressAppPort: number;
+    AudioInputVolumes: AudioInputModel[];
+    UpdateAudioVolumes: (uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) => void;
 };
 
 export type AudioInputModel = {
