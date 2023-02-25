@@ -118,7 +118,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             DisplayName: description.displayName,
             ExpressAppPort: this.expressAppPort
         } as DeviceDetails;
+
         new SonosPlatformAccessory(this, accessory, this.expressApp);
+
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
