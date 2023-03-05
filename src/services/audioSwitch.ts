@@ -4,7 +4,6 @@ import { DeviceEvents } from '../models/enums';
 import { AudioInputModel, DeviceDetails } from '../models/models';
 import { AVTransportEvent } from '../models/sonos-types';
 
-//FIXME: I need to sit and think about the volume switching and properly test the logic here, it's all over the place right now.
 export class AudioSwitchService {
     private device: SonosDeviceManager;
     private logger: SonosLogger;
@@ -24,8 +23,11 @@ export class AudioSwitchService {
     private async handleAudioSwitched(data: AVTransportEvent) {
         if (data.CurrentTrackMetaDataParsed === undefined) return;
 
-        const currentVolume = await this.device.getVolume();
         const inputUri = this.parseUri(data.CurrentTrackMetaDataParsed.uri);
+        if (inputUri === this.previousUri) return;
+
+        const currentVolume = await this.device.getVolume();
+
         const currentSettings = this.details.AudioInputVolumes.find((x) => x.InputUri === inputUri);
 
         this.logger.logDebug(`Current volume ${currentVolume}`);
@@ -39,9 +41,6 @@ export class AudioSwitchService {
         if (currentSettings) {
             this.device.setVolume(currentSettings.Volume);
         }
-        // else {
-        //     this.audioInputVolumes.push({ InputUri: inputUri, Volume: currentVolume });
-        // }
 
         this.previousUri = inputUri;
     }

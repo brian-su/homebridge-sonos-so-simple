@@ -133,16 +133,6 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
-    private updateInputVolumeLevels(uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) {
-        const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
-        if (!existingAccessory) return;
-
-        const currentIndex = currentSavedSettings.findIndex((x) => x.InputUri === currentSettings.InputUri);
-        currentIndex === -1 ? currentSavedSettings.push(currentSettings) : (currentSavedSettings[currentIndex] = currentSettings);
-
-        this.api.updatePlatformAccessories([existingAccessory]);
-    }
-
     removeDevicesNotDiscovered() {
         this.log.info('Got All Devices');
         this.log.debug(`Sonos found the following: ${JSON.stringify(this.foundDevices)}`);
@@ -161,7 +151,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 
-    async setupExpressApp(): Promise<Express> {
+    private async setupExpressApp(): Promise<Express> {
         this.log.info('Setting up Express server');
         var targetPort = DEFAULT_EXPRESS_PORT;
         var actualPort = 0;
@@ -187,5 +177,17 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.expressAppPort = actualPort;
 
         return app;
+    }
+
+    private updateInputVolumeLevels(uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) {
+        const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+        if (!existingAccessory) return;
+
+        const currentIndex = currentSavedSettings.findIndex((x) => x.InputUri === currentSettings.InputUri);
+        currentIndex === -1 ? currentSavedSettings.push(currentSettings) : (currentSavedSettings[currentIndex] = currentSettings);
+
+        this.log.debug(`Saving Audio Details ${JSON.stringify(currentSettings)}`);
+
+        this.api.updatePlatformAccessories([existingAccessory]);
     }
 }
