@@ -5,7 +5,7 @@ import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
-import { FoundDevices, DeviceDetails } from './models/models';
+import { FoundDevices, DeviceDetails, AudioInputModel } from './models/models';
 import helmet from 'helmet';
 
 /**
@@ -72,7 +72,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             }
         }
 
-        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's on func generation so doesn't know to wait for the others
+        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's own func generation so doesn't know to wait for the others
         //Basically just don't refactor this thinking you're smart Brian. I see you.
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
@@ -97,17 +97,8 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.debug(`Found device - UUID is : ${uuid}`);
         const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
-        if (existingAccessory) {
-            this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
-            existingAccessory.displayName = deviceDisplayName;
-            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
-            this.api.updatePlatformAccessories([existingAccessory]);
-            return;
-        }
-
-        this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
-        const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
-        accessory.context.device = {
+        const deviceDetailsModel = {
+            UUID: uuid,
             Host: device.host,
             IsSoundBar: IsSoundBar,
             Manufacturer: description.manufacturer,
@@ -116,9 +107,29 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             FirmwareVersion: description.softwareVersion,
             RoomName: description.roomName,
             DisplayName: description.displayName,
-            ExpressAppPort: this.expressAppPort
+            ExpressAppPort: this.expressAppPort,
+            AudioInputVolumes: [],
+            UpdateAudioVolumes: this.updateInputVolumeLevels.bind(this)
         } as DeviceDetails;
+
+        if (existingAccessory) {
+            this.log.info(`Adding ${description.roomName} ${description.displayName} from cache`);
+            existingAccessory.displayName = deviceDisplayName;
+            deviceDetailsModel.AudioInputVolumes = existingAccessory.context.device.AudioInputVolumes;
+            existingAccessory.context.device = deviceDetailsModel;
+            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
+
+            this.log.debug(`EXISTING DEVICE DETAILS: ${JSON.stringify(existingAccessory.context.device.AudioInputVolumes)}`);
+
+            this.api.updatePlatformAccessories([existingAccessory]);
+            return;
+        }
+
+        this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
+        const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
+        accessory.context.device = deviceDetailsModel;
         new SonosPlatformAccessory(this, accessory, this.expressApp);
+
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
 
@@ -140,7 +151,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 
-    async setupExpressApp(): Promise<Express> {
+    private async setupExpressApp(): Promise<Express> {
         this.log.info('Setting up Express server');
         var targetPort = DEFAULT_EXPRESS_PORT;
         var actualPort = 0;
@@ -166,5 +177,17 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.expressAppPort = actualPort;
 
         return app;
+    }
+
+    private updateInputVolumeLevels(uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) {
+        const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+        if (!existingAccessory) return;
+
+        const currentIndex = currentSavedSettings.findIndex((x) => x.InputUri === currentSettings.InputUri);
+        currentIndex === -1 ? currentSavedSettings.push(currentSettings) : (currentSavedSettings[currentIndex] = currentSettings);
+
+        this.log.debug(`Saving Audio Details ${JSON.stringify(currentSettings)}`);
+
+        this.api.updatePlatformAccessories([existingAccessory]);
     }
 }

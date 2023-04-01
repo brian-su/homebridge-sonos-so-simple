@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import { Sonos } from 'sonos';
 import { DeviceEvents } from '../models/enums';
 import { DeviceDetails } from '../models/models';
+import { AVTransportEvent } from '../models/sonos-types';
 import { SonosLogger } from './sonosLogger';
 
 export class SonosDeviceManager extends EventEmitter {
@@ -17,6 +18,10 @@ export class SonosDeviceManager extends EventEmitter {
         this.isSoundbar = deviceDetails.IsSoundBar;
         this.sonosDevice = device;
         this.log = log;
+
+        this.sonosDevice.on('AVTransport', (data) => {
+            this.emit(DeviceEvents.AudioSwitched, data as AVTransportEvent);
+        });
 
         this.sonosDevice.on('RenderingControl', (data) => {
             if (data.Volume) {
@@ -76,6 +81,10 @@ export class SonosDeviceManager extends EventEmitter {
             this.sonosDevice.setVolume(this.previousLevel);
             this.previousLevel = 0; //reset after use to prevent constantly resetting the volume back to this value
         }
+    }
+
+    public async getVolume(): Promise<number> {
+        return await this.sonosDevice.getVolume();
     }
 
     public setVolume(value: number) {

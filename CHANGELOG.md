@@ -2,6 +2,12 @@
 
 Changes to the repo are noted here:
 
+## 0.4.0 - 2023-04-01
+
+### Features:
+
+Adds the ability to remember the volume for each input when you switch. If enabled when you switch inputs the volume will be set to the level you last set. Feature is disabled by default.
+
 ## 0.3.0 - 2023-01-02
 
 ### Features:

@@ -35,6 +35,11 @@
                 "title": "Offer endpoints to change volume up and down",
                 "type": "boolean",
                 "default": false
+            },
+            "preserveVolumeOnInputSwitch": {
+                "title": "Preserve last known volume level for each input type (tv, music etc)",
+                "type": "boolean",
+                "default": false
             }
         }
     }

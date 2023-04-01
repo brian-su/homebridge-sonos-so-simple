@@ -1,3 +1,5 @@
+import { AudioSwitchService } from '../services/audioSwitch';
+
 export enum VolumeOptions {
     None = 'none',
     Lightbulb = 'bulb',
@@ -7,7 +9,8 @@ export enum VolumeOptions {
 export enum DeviceEvents {
     DeviceVolumeUpdate = 'DeviceVolumeUpdate',
     SpeechEnhancementUpdate = 'SpeechEnhancementUpdate',
-    NightModeUpdate = 'NightModeUpdate'
+    NightModeUpdate = 'NightModeUpdate',
+    AudioSwitched = 'AudioSwitched'
 }
 
 export enum ServiceNames {
@@ -16,5 +19,6 @@ export enum ServiceNames {
     SpeechEnhancementService = 'Speech Enhancement',
     NightModeService = 'Night Mode',
     UpButtonService = 'Up Button',
-    DownButtonService = 'Down Button'
+    DownButtonService = 'Down Button',
+    AudioSwitchService = 'Audio Switch'
 }

@@ -4,9 +4,9 @@ export class SonosLogger {
     private log: Logger;
     private logHeader: string;
 
-    constructor(deviceName: string, log: Logger) {
+    constructor(deviceName: string, roomName: string, log: Logger) {
         this.log = log;
-        this.logHeader = `${deviceName} - `;
+        this.logHeader = `${roomName} ${deviceName} - `;
     }
 
     public logInfo(message: string): void {

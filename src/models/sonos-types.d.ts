@@ -210,3 +210,47 @@ export interface Loudness {
     channel: string;
     val: string;
 }
+
+export interface AVTransportEvent {
+    TransportState: string;
+    CurrentPlayMode: string;
+    CurrentCrossfadeMode: string;
+    NumberOfTracks: string;
+    CurrentTrack: string;
+    CurrentSection: string;
+    CurrentTrackURI: string;
+    CurrentTrackDuration: string;
+    CurrentTrackMetaData: string;
+    'r:NextTrackURI': string;
+    'r:NextTrackMetaData': string;
+    'r:EnqueuedTransportURI': string;
+    'r:EnqueuedTransportURIMetaData': string;
+    'r:DirectControlClientID': string;
+    'r:DirectControlIsSuspended': string;
+    'r:DirectControlAccountID': string;
+    CurrentTrackMetaDataParsed: CurrentTrackMetaDataParsed;
+    'r:NextTrackMetaDataParsed': RNextTrackMetaDataParsed;
+}
+
+export interface CurrentTrackMetaDataParsed {
+    id: any;
+    parentID: any;
+    title: string;
+    artist: string;
+    album: string;
+    albumArtist: any;
+    albumArtURI: string;
+    uri: string;
+    duration: number;
+    queuePosition: number;
+}
+
+export interface RNextTrackMetaDataParsed {
+    id: any;
+    parentID: any;
+    title: any;
+    artist: any;
+    album: any;
+    albumArtist: any;
+    albumArtURI: any;
+}
