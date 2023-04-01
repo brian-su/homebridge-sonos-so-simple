@@ -119,7 +119,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             existingAccessory.context.device = deviceDetailsModel;
             new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
 
-            this.log.info(`EXISTING DEVICE DETAILS: ${JSON.stringify(existingAccessory.context.device.AudioInputVolumes)}`);
+            this.log.debug(`EXISTING DEVICE DETAILS: ${JSON.stringify(existingAccessory.context.device.AudioInputVolumes)}`);
 
             this.api.updatePlatformAccessories([existingAccessory]);
             return;
