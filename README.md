@@ -38,20 +38,23 @@ npm install homebridge-sonos-so-simple -g
 
 Once installed update the config, again using the config ui or using the example config above.
 
-## Volume Control Endpoints
+## Control HTTP Endpoints
 
-As of version 0.3.0 the plugin can offer two endpoints to allow you to hook up shortcuts and or buttons to trigger the volume up and down. By default this feature is turned off in the config.
+As of version 0.3.0 the plugin can offer api endpoints to allow you to hook up shortcuts and or buttons to trigger the volume up and down and toggle device settings like mute, night mode and speech enhancement. By default this feature is turned off in the config.
 
-To create a shortcut in the shortcuts app, pick the "Get Contents of URL" option, paste the up or down link in and voila!
-
-Once the featured is toggled on the plugin will open up a port on the Homebridge server and offer two endpoints (volume-up & volume-down) for each discovered Sonos zone.
+Once the featured is toggled on the plugin will open up a port on the Homebridge server and offer the endpoints for each discovered Sonos zone.
 
 Eg:
 
 ```
 {{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-up
 {{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-down
+{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-mute
+{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-night-mode
+{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-speech-enhancement
 ```
+
+To create a shortcut in the shortcuts app, pick the "Get Contents of URL" option, type the url in and voila!
 
 **The actual port it opened & the URIs it generated will be outputted into the logs so have a look and grab yours from there.**
 
