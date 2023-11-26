@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { Sonos } from 'sonos';
 import { DeviceEvents } from '../models/enums';
 import { DeviceDetails } from '../models/models';
-import { AVTransportEvent } from '../models/sonos-types';
+import { AVTransportEvent, EqValueResponse } from '../models/sonos-types';
 import { SonosLogger } from './sonosLogger';
 
 export class SonosDeviceManager extends EventEmitter {
@@ -96,11 +96,15 @@ export class SonosDeviceManager extends EventEmitter {
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
     }
 
-    //TODO: Not 100% about this method working, need to test it
-    public getSpeechEnhancement(): boolean {
-        var value = this.sonosDevice.renderingControlService()._request('GetEQ', { InstanceID: 0, EQType: 'DialogLevel' });
-        this.log.logDebug(`Triggered GET Speech Enhancement: ${value}`);
-        return value;
+    public async getSpeechEnhancement(): Promise<boolean> {
+        var response = (await this.sonosDevice
+            .renderingControlService()
+            ._request('GetEQ', { InstanceID: 0, EQType: 'DialogLevel' })) as EqValueResponse;
+
+        var toReturn = response.CurrentValue === '1';
+
+        this.log.logDebug(`Triggered GET Speech Enhancement: ${toReturn}`);
+        return toReturn;
     }
 
     public setNightMode(value: boolean) {
@@ -108,10 +112,14 @@ export class SonosDeviceManager extends EventEmitter {
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
     }
 
-    //TODO: Not 100% about this method working, need to test it
-    public getNightMode(): boolean {
-        var value = this.sonosDevice.renderingControlService()._request('GetEQ', { InstanceID: 0, EQType: 'NightMode' });
-        this.log.logDebug(`Triggered GET Night Mode: ${value}`);
-        return value;
+    public async getNightMode(): Promise<boolean> {
+        var response = (await this.sonosDevice
+            .renderingControlService()
+            ._request('GetEQ', { InstanceID: 0, EQType: 'NightMode' })) as EqValueResponse;
+
+        var toReturn = response.CurrentValue === '1';
+
+        this.log.logDebug(`Triggered GET Night Mode: ${toReturn}`);
+        return toReturn;
     }
 }

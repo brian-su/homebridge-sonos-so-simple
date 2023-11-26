@@ -65,7 +65,9 @@ export class ApiControlService {
         this.app.all(this.toggleMuteUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getMuted();
+                var message = currentStatus ? 'Turning Mute off' : 'Turning Mute on';
                 await this.device.setMuted(!currentStatus);
+                res.status(200).send(message);
             } catch (error: any) {
                 res.status(500).send(error.message);
             }
@@ -74,7 +76,9 @@ export class ApiControlService {
         this.app.all(this.toggleNightModeUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getNightMode();
+                var message = currentStatus ? 'Turning Night mode off' : 'Turning Night Mode on';
                 await this.device.setNightMode(!currentStatus);
+                res.status(200).send(message);
             } catch (error: any) {
                 res.status(500).send(error.message);
             }
@@ -83,7 +87,9 @@ export class ApiControlService {
         this.app.all(this.toggleSpeechEnhancementUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getSpeechEnhancement();
+                var message = currentStatus ? 'Turning Speech Enhancement off' : 'Turning Speech Enhancement on';
                 await this.device.setSpeechEnhancement(!currentStatus);
+                res.status(200).send(message);
             } catch (error: any) {
                 res.status(500).send(error.message);
             }
