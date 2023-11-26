@@ -1,9 +1,8 @@
 import EventEmitter from 'events';
-import { Sonos } from 'sonos';
 import { DeviceEvents } from '../models/enums';
 import { DeviceDetails } from '../models/models';
-import { AVTransportEvent } from '../models/sonos-types';
 import { SonosLogger } from './sonosLogger';
+import { Sonos } from '../sonos/sonos';
 
 export class SonosDeviceManager extends EventEmitter {
     private sonosDevice: Sonos;
@@ -20,7 +19,7 @@ export class SonosDeviceManager extends EventEmitter {
         this.log = log;
 
         this.sonosDevice.on('AVTransport', (data) => {
-            this.emit(DeviceEvents.AudioSwitched, data as AVTransportEvent);
+            this.emit(DeviceEvents.AudioSwitched, data as any);
         });
 
         this.sonosDevice.on('RenderingControl', (data) => {
@@ -62,7 +61,7 @@ export class SonosDeviceManager extends EventEmitter {
     }
 
     public async getMuted(): Promise<boolean> {
-        let mute = await this.sonosDevice.getMuted();
+        let mute = await this.sonosDevice.getMute();
         this.log.logDebug(`Triggered GET Mute switch: ${mute}`);
         return mute;
     }
@@ -74,7 +73,7 @@ export class SonosDeviceManager extends EventEmitter {
         }
 
         this.log.logDebug(`Triggered SET Mute switch: ${value}`);
-        this.sonosDevice.setMuted(value);
+        this.sonosDevice.setMute(value);
 
         if (!value && !this.isSoundbar && this.previousLevel !== 0) {
             this.log.logDebug(`Setting volume to previous level - ${this.previousLevel}`);
@@ -93,11 +92,11 @@ export class SonosDeviceManager extends EventEmitter {
 
     public setSpeechEnhancement(value: boolean) {
         this.log.logDebug(`Triggered SET Speech Enhancement: ${value}`);
-        this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
+        this.sonosDevice.renderingControlService('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
     }
 
     public setNightMode(value: boolean) {
         this.log.logDebug(`Triggered SET Night Mode: ${value}`);
-        this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
+        this.sonosDevice.renderingControlService('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
     }
 }

@@ -1,12 +1,13 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
-import { AsyncDeviceDiscovery } from 'sonos';
-import { Device } from './models/sonos-types';
 import express, { Express } from 'express';
 import detect from 'detect-port';
 import { FoundDevices, DeviceDetails, AudioInputModel } from './models/models';
 import helmet from 'helmet';
+import { DeviceDiscovery } from './sonos/deviceDiscovery';
+import { ApiDeviceModel } from './sonos/models/apiDeviceModel';
+import { DeviceDiscoveryModel } from './sonos/models/deviceDiscoveryModel';
 
 /**
  * HomebridgePlatform
@@ -20,7 +21,6 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     public readonly accessories: PlatformAccessory[] = [];
 
     private foundDevices: FoundDevices[] = [];
-    private coordinators: string[] = [];
     private expressApp: Express | null = null;
     private expressAppPort: number | undefined;
 
@@ -51,29 +51,44 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
     async discoverDevices() {
         this.log.info('Getting Devices');
-        let asyncDiscovery = new AsyncDeviceDiscovery();
+        let asyncDiscovery = new DeviceDiscovery();
 
-        let sonosDevices: Device[];
+        let devices: ApiDeviceModel[];
+        let sonosDevices: DeviceDiscoveryModel[] = [];
+        this.log.info('GEtting stuff');
+        await asyncDiscovery.discoverAllDevices();
+        this.log.info('got details');
         try {
-            sonosDevices = await asyncDiscovery.discoverMultiple();
+            devices = await asyncDiscovery.discoverAllDevices();
+
+            this.log.info(JSON.stringify(devices));
+
+            var coordinatorDevices = devices.filter((x) => x.device.primaryDeviceId);
+            var standaloneDevices = devices.filter((x) => !x.device.primaryDeviceId);
+
+            coordinatorDevices.forEach((device) => {
+                sonosDevices.push(new DeviceDiscoveryModel(device, true));
+            });
+
+            standaloneDevices.forEach((device) => {
+                //Only add the device if it's not already setup as a group coordinator
+                if (sonosDevices.findIndex((x) => x.device.playerId === device.playerId) === -1) {
+                    sonosDevices.push(new DeviceDiscoveryModel(device, false));
+                }
+            });
         } catch (error: any) {
             this.log.error(error.message);
             return;
         }
 
-        this.coordinators = (await sonosDevices[0].getAllGroups()).map((x) => x.CoordinatorDevice().host);
-
-        if (this.config.volumeControlEndpoints) {
-            try {
-                this.expressApp = await this.setupExpressApp();
-            } catch (error: any) {
-                this.log.error(error.message);
-                return;
-            }
+        //TODO: Without this we can't subscribe to sonos events.
+        try {
+            this.expressApp = await this.setupExpressApp();
+        } catch (error: any) {
+            this.log.error(error.message);
+            return;
         }
 
-        //This is done this way for a reason, the .forEach doesn't await as each iteration has it's own func generation so doesn't know to wait for the others
-        //Basically just don't refactor this thinking you're smart Brian. I see you.
         for (let device of sonosDevices) {
             await this.registerDiscoveredDevices(device);
         }
@@ -81,9 +96,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.removeDevicesNotDiscovered();
     }
 
-    async registerDiscoveredDevices(device: Device) {
-        if (!this.coordinators.includes(device.host)) return;
-
+    async registerDiscoveredDevices(device: DeviceDiscoveryModel) {
         let description = await device.deviceDescription();
         let displayNameUpperCase = description.displayName.toUpperCase();
         let IsSoundBar = SOUNDBAR_NAMES.includes(displayNameUpperCase);
@@ -99,8 +112,9 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         const deviceDetailsModel = {
             UUID: uuid,
-            Host: device.host,
+            Host: device.device.device.ip, //FIXME: FOR THE LOVE OF CHRIST THIS IS DUMB
             IsSoundBar: IsSoundBar,
+            IsGroupCoordinator: device.isCoordinator,
             Manufacturer: description.manufacturer,
             SerialNumber: description.serialNum,
             ModelName: description.modelName,
@@ -109,6 +123,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             DisplayName: description.displayName,
             ExpressAppPort: this.expressAppPort,
             AudioInputVolumes: [],
+            ApiDeviceDetails: device.device,
             UpdateAudioVolumes: this.updateInputVolumeLevels.bind(this)
         } as DeviceDetails;
 

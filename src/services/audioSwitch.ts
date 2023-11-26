@@ -1,8 +1,7 @@
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { SonosLogger } from '../helpers/sonosLogger';
 import { DeviceEvents } from '../models/enums';
-import { AudioInputModel, DeviceDetails } from '../models/models';
-import { AVTransportEvent } from '../models/sonos-types';
+import { AVTransportEvent, AudioInputModel, DeviceDetails } from '../models/models';
 
 export class AudioSwitchService {
     private device: SonosDeviceManager;

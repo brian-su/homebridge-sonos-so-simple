@@ -1,5 +1,3 @@
-import { AudioSwitchService } from '../services/audioSwitch';
-
 export enum VolumeOptions {
     None = 'none',
     Lightbulb = 'bulb',

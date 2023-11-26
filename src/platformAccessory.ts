@@ -1,6 +1,5 @@
 import { PlatformAccessory } from 'homebridge';
 import { SonosPlatform } from './platform';
-import { Sonos } from 'sonos';
 import { SonosDeviceManager } from './helpers/sonosDeviceManager';
 import { VolumeControlService } from './services/volumeControls';
 import { MuteService } from './services/mute';
@@ -12,6 +11,7 @@ import { VolumeEndpointsService } from './services/volumeEndpoints';
 import { VolumeOptions, ServiceNames } from './models/enums';
 import { DeviceDetails } from './models/models';
 import { AudioSwitchService } from './services/audioSwitch';
+import { Sonos } from './sonos/sonos';
 
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;
@@ -19,7 +19,8 @@ export class SonosPlatformAccessory {
     constructor(platform: SonosPlatform, accessory: PlatformAccessory, expressApp: Express | null) {
         this.accessory = accessory;
         const deviceDetails = accessory.context.device as DeviceDetails;
-        const sonosDevice = new Sonos(deviceDetails.Host);
+        platform.log.info(JSON.stringify(deviceDetails));
+        const sonosDevice = new Sonos(deviceDetails.Host, true);
         const logger = new SonosLogger(deviceDetails.ModelName, deviceDetails.RoomName, platform.log);
 
         // set accessory information
