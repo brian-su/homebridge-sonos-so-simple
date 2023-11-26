@@ -4,7 +4,7 @@ import { SonosLogger } from '../helpers/sonosLogger';
 import { DEFAULT_VOLUME_CHANGE } from '../models/constants';
 import { DeviceDetails } from '../models/models';
 
-export class VolumeEndpointsService {
+export class ApiControlService {
     private app: Express;
     private modelName: string;
     private roomName: string;
