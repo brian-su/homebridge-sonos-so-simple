@@ -96,8 +96,22 @@ export class SonosDeviceManager extends EventEmitter {
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
     }
 
+    //TODO: Not 100% about this method working, need to test it
+    public getSpeechEnhancement(): boolean {
+        var value = this.sonosDevice.renderingControlService()._request('GetEQ', { InstanceID: 0, EQType: 'DialogLevel' });
+        this.log.logDebug(`Triggered GET Speech Enhancement: ${value}`);
+        return value;
+    }
+
     public setNightMode(value: boolean) {
         this.log.logDebug(`Triggered SET Night Mode: ${value}`);
         this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
+    }
+
+    //TODO: Not 100% about this method working, need to test it
+    public getNightMode(): boolean {
+        var value = this.sonosDevice.renderingControlService()._request('GetEQ', { InstanceID: 0, EQType: 'NightMode' });
+        this.log.logDebug(`Triggered GET Night Mode: ${value}`);
+        return value;
     }
 }
