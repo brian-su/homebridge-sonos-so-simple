@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { VolumeResponse } from './models/volumeResponse';
 import { SONOS_API_HEADERS } from '../models/constants';
 import { EventEmitter } from 'stream';
+import { EqType } from '../models/enums';
 
 export class Sonos extends EventEmitter {
     private baseUrl: string;
@@ -61,7 +62,14 @@ export class Sonos extends EventEmitter {
         });
     }
 
-    renderingControlService(arg0: string, arg1: { InstanceID: number; EQType: string; DesiredValue: string }) {
+    setEq(type: EqType, value: boolean) {
+        // this.sonosDevice.renderingControlService()._request('SetEQ', { InstanceID: 0, EQType: type, DesiredValue: value ? '1' : '0' });
+        throw new Error('Method not implemented.');
+    }
+
+    getEq(type: EqType): Promise<boolean> {
+        // var toReturn = await this.sonosDevice.renderingControlService()._request('GetEQ', { InstanceID: 0, EQType: type }) as {'CurrentValue' : string};
+        // return toReturn.CurrentValue === '1';
         throw new Error('Method not implemented.');
     }
 

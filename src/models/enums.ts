@@ -20,3 +20,8 @@ export enum ServiceNames {
     DownButtonService = 'Down Button',
     AudioSwitchService = 'Audio Switch'
 }
+
+export enum EqType {
+    DialogLevel = 'DialogLevel',
+    NightMode = 'NightMode'
+}
