@@ -7,7 +7,7 @@ Changes to the repo are noted here:
 ## Features:
 
 -   Adding support for Playbase as a soundbar.
--   Adds to the volume control endpoints feature to add mute, night mode and speech enhancement toggling via HTTP endpoints, locally from within your network. See the [documentation](https://github.com/brian-su/homebridge-sonos-so-simple#control-http-endpoints) for more info.
+-   Adds to the volume control endpoints feature to add mute, night mode and speech enhancement toggling via API endpoints, locally from within your network. See the [documentation](https://github.com/brian-su/homebridge-sonos-so-simple#rest-control-endpoints) for more info.
 
 ## 0.4.0 - 2023-04-01
 

@@ -38,9 +38,9 @@ npm install homebridge-sonos-so-simple -g
 
 Once installed update the config, again using the config ui or using the example config above.
 
-## Control HTTP Endpoints
+## REST Control Endpoints
 
-As of version 0.3.0 the plugin can offer api endpoints to allow you to hook up shortcuts and or buttons to trigger the volume up and down and toggle device settings like mute, night mode and speech enhancement. By default this feature is turned off in the config.
+As of version 0.3.0 the plugin can offer api endpoints to allow you to hook up shortcuts and or buttons to trigger the volume up and down. And as of 0.5.0, toggle device settings like mute, night mode and speech enhancement. By default this feature is turned off in the config.
 
 Once the featured is toggled on the plugin will open up a port on the Homebridge server and offer the endpoints for each discovered Sonos zone.
 
