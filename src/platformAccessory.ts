@@ -8,7 +8,7 @@ import { SpeechEnhancementService } from './services/speechEnhancement';
 import { NightModeService } from './services/nightMode';
 import { SonosLogger } from './helpers/sonosLogger';
 import { Express } from 'express';
-import { VolumeEndpointsService } from './services/volumeEndpoints';
+import { ApiControlService } from './services/apiControl';
 import { VolumeOptions, ServiceNames } from './models/enums';
 import { DeviceDetails } from './models/models';
 import { AudioSwitchService } from './services/audioSwitch';
@@ -59,7 +59,7 @@ export class SonosPlatformAccessory {
         }
 
         if (expressApp) {
-            new VolumeEndpointsService(expressApp, deviceDetails, manager, logger);
+            new ApiControlService(expressApp, deviceDetails, manager, logger);
 
             // These have to be registered after the correct routes
             // 404 handler
