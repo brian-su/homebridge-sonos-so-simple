@@ -2,6 +2,8 @@
 
 Changes to the repo are noted here:
 
+## 1.0.0 2024...
+
 ## 0.5.1 - 2023-11-27
 
 -   Bug fix to the package deployment

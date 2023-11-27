@@ -113,4 +113,8 @@ export class SonosDeviceManager extends EventEmitter {
         this.log.logDebug(`Triggered GET Night Mode: ${response}`);
         return response;
     }
+
+    public async playAudioClip(streamUrl: string) {
+        await this.sonosDevice.playAudioClip(streamUrl);
+    }
 }

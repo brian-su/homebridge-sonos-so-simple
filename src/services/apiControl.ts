@@ -18,6 +18,7 @@ export class ApiControlService {
     private toggleMuteUri: string;
     private toggleSpeechEnhancementUri: string;
     private toggleNightModeUri: string;
+    private audioClip: string;
 
     constructor(expressApp: Express, deviceDetails: DeviceDetails, sonosDevice: SonosDeviceManager, logger: SonosLogger) {
         this.app = expressApp;
@@ -35,6 +36,7 @@ export class ApiControlService {
         this.toggleMuteUri = `${deviceUri}/toggle-mute`;
         this.toggleSpeechEnhancementUri = `${deviceUri}/toggle-speech-enhancement`;
         this.toggleNightModeUri = `${deviceUri}/toggle-night-mode`;
+        this.audioClip = `${deviceUri}/play-audio`;
 
         this.setupEndpoints();
         this.logEndpointUris();
@@ -90,6 +92,16 @@ export class ApiControlService {
                 var message = currentStatus ? 'Turning Speech Enhancement off' : 'Turning Speech Enhancement on';
                 await this.device.setSpeechEnhancement(!currentStatus);
                 res.status(200).send(message);
+            } catch (error: any) {
+                res.status(500).send(error.message);
+            }
+        });
+
+        this.app.all(this.audioClip, async (req: Request, res: Response) => {
+            try {
+                const url = req.query.url as string;
+                this.device.playAudioClip(url);
+                res.status(200).send('Request sent');
             } catch (error: any) {
                 res.status(500).send(error.message);
             }
