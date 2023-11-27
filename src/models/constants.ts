@@ -10,7 +10,7 @@ export const BREAKING_CHANGE_PACKAGE_VERSION = '0.3.0';
 export const PLATFORM_NAME = 'SonosSoSimplePlatform';
 export const PLUGIN_NAME = 'homebridge-sonos-so-simple';
 
-export const SOUNDBAR_NAMES = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY'];
+export const SOUNDBAR_NAMES = ['BEAM', 'ARC', 'PLAYBAR', 'ARC SL', 'RAY', 'PLAYBASE'];
 export const DEFAULT_EXPRESS_PORT = 3000;
 export const DEFAULT_VOLUME_CHANGE = 2;
 

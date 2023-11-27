@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { DeviceEvents } from '../models/enums';
+import { DeviceEvents, EqType } from '../models/enums';
 import { DeviceDetails } from '../models/models';
 import { SonosLogger } from './sonosLogger';
 import { Sonos } from '../sonos/sonos';
@@ -92,11 +92,25 @@ export class SonosDeviceManager extends EventEmitter {
 
     public setSpeechEnhancement(value: boolean) {
         this.log.logDebug(`Triggered SET Speech Enhancement: ${value}`);
-        this.sonosDevice.renderingControlService('SetEQ', { InstanceID: 0, EQType: 'DialogLevel', DesiredValue: value ? '1' : '0' });
+        this.sonosDevice.setEq(EqType.DialogLevel, value);
+    }
+
+    public async getSpeechEnhancement(): Promise<boolean> {
+        var response = await this.sonosDevice.getEq(EqType.DialogLevel);
+
+        this.log.logDebug(`Triggered GET Speech Enhancement: ${response}`);
+        return response;
     }
 
     public setNightMode(value: boolean) {
         this.log.logDebug(`Triggered SET Night Mode: ${value}`);
-        this.sonosDevice.renderingControlService('SetEQ', { InstanceID: 0, EQType: 'NightMode', DesiredValue: value ? '1' : '0' });
+        this.sonosDevice.setEq(EqType.NightMode, value);
+    }
+
+    public async getNightMode(): Promise<boolean> {
+        var response = await this.sonosDevice.getEq(EqType.NightMode);
+
+        this.log.logDebug(`Triggered GET Night Mode: ${response}`);
+        return response;
     }
 }
