@@ -32,7 +32,7 @@
                 "required": true
             },
             "volumeControlEndpoints": {
-                "title": "Offer endpoints to change volume up and down",
+                "title": "Offer api endpoints to control your devices via HTTP requests",
                 "type": "boolean",
                 "default": false
             },

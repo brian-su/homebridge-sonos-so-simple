@@ -254,3 +254,7 @@ export interface RNextTrackMetaDataParsed {
     albumArtist: any;
     albumArtURI: any;
 }
+
+export interface EqValueResponse {
+    CurrentValue: string;
+}
