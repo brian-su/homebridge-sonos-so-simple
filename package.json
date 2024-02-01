@@ -41,7 +41,7 @@
         "@typescript-eslint/parser": "^4.14.0",
         "homebridge": "^1.2.5",
         "husky": "^8.0.2",
-        "nodemon": "^2.0.22",
+        "nodemon": "^3.0.3",
         "prettier": "^2.8.8",
         "rimraf": "^5.0.0",
         "ts-node": "^10.9.1",
