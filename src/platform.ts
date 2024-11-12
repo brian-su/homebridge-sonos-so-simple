@@ -24,7 +24,11 @@ export class SonosPlatform implements DynamicPlatformPlugin {
     private expressApp: Express | null = null;
     private expressAppPort: number | undefined;
 
-    constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
+    constructor(
+        public readonly log: Logger,
+        public readonly config: PlatformConfig,
+        public readonly api: API
+    ) {
         this.log.debug('Finished initializing platform:', this.config.name);
 
         // When this event is fired it means Homebridge has restored all cached accessories from disk.
