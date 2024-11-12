@@ -2,6 +2,10 @@
 
 Changes to the repo are noted here:
 
+## 0.5.2 - 2024-11-12
+
+-   Adding support for the new Arc Ultra. Thanks to Matt17000 for the update.
+
 ## 0.5.1 - 2023-11-27
 
 -   Bug fix to the package deployment
