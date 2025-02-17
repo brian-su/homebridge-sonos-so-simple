@@ -182,10 +182,11 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         var server = app.listen(actualPort, () => {
             var address: string = '';
             var addressInfo = server.address();
+
             if (typeof addressInfo === 'string') {
                 address = addressInfo;
             } else if (addressInfo && addressInfo.address) {
-                address = addressInfo.address === '::' ? 'localhost' : addressInfo.address;
+                address = JSON.stringify(addressInfo);
             }
 
             this.log.info(`Sonos Device Control endpoints are now listening on port ${actualPort} at ${address}`);

@@ -116,6 +116,7 @@ export class ApiControlService {
         this.logger.logInfo(
             `Toggle Speech Enhancement endpoint listening on - {{YOUR_HOMEBRIDGE_ADDRESS}}:${this.port}${this.toggleSpeechEnhancementUri}`
         );
+        this.logger.logInfo(`Get Volume level - {{YOUR_HOMEBRIDGE_ADDRESS}}:${this.port}${this.getVolumeLevelUri}`);
     }
 
     private parseQueryParam(param: string | undefined): number {
