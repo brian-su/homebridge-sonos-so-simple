@@ -1,11 +1,11 @@
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
-import { Express, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { SonosLogger } from '../helpers/sonosLogger';
 import { DEFAULT_VOLUME_CHANGE } from '../models/constants';
-import { DeviceDetails } from '../models/models';
+import { DeviceDetails, ExpressModel } from '../models/models';
 
 export class ApiControlService {
-    private app: Express;
+    private expressModel: ExpressModel;
     private modelName: string;
     private roomName: string;
     private device: SonosDeviceManager;
@@ -18,9 +18,10 @@ export class ApiControlService {
     private toggleMuteUri: string;
     private toggleSpeechEnhancementUri: string;
     private toggleNightModeUri: string;
+    private getVolumeLevelUri: string;
 
-    constructor(expressApp: Express, deviceDetails: DeviceDetails, sonosDevice: SonosDeviceManager, logger: SonosLogger) {
-        this.app = expressApp;
+    constructor(expressModel: ExpressModel, deviceDetails: DeviceDetails, sonosDevice: SonosDeviceManager, logger: SonosLogger) {
+        this.expressModel = expressModel;
 
         //Make the string URL compliant as per https://stackoverflow.com/a/8485137
         this.roomName = deviceDetails.RoomName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
@@ -35,6 +36,7 @@ export class ApiControlService {
         this.toggleMuteUri = `${deviceUri}/toggle-mute`;
         this.toggleSpeechEnhancementUri = `${deviceUri}/toggle-speech-enhancement`;
         this.toggleNightModeUri = `${deviceUri}/toggle-night-mode`;
+        this.getVolumeLevelUri = `${deviceUri}/volume`;
 
         this.setupEndpoints();
         this.logEndpointUris();
@@ -42,7 +44,7 @@ export class ApiControlService {
 
     setupEndpoints() {
         // Listening to all http verbs to make it easier incase a user sets things up wrong.
-        this.app.all(this.upUri, async (req: Request, res: Response) => {
+        this.expressModel.app.all(this.upUri, async (req: Request, res: Response) => {
             try {
                 const increment = this.parseQueryParam(req.query.value as string);
                 await this.device.volumeUp(increment);
@@ -52,7 +54,7 @@ export class ApiControlService {
             }
         });
 
-        this.app.all(this.downUri, async (req: Request, res: Response) => {
+        this.expressModel.app.all(this.downUri, async (req: Request, res: Response) => {
             try {
                 const decrement = this.parseQueryParam(req.query.value as string);
                 await this.device.volumeDown(decrement);
@@ -62,7 +64,7 @@ export class ApiControlService {
             }
         });
 
-        this.app.all(this.toggleMuteUri, async (req: Request, res: Response) => {
+        this.expressModel.app.all(this.toggleMuteUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getMuted();
                 var message = currentStatus ? 'Turning Mute off' : 'Turning Mute on';
@@ -73,7 +75,7 @@ export class ApiControlService {
             }
         });
 
-        this.app.all(this.toggleNightModeUri, async (req: Request, res: Response) => {
+        this.expressModel.app.all(this.toggleNightModeUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getNightMode();
                 var message = currentStatus ? 'Turning Night mode off' : 'Turning Night Mode on';
@@ -84,12 +86,21 @@ export class ApiControlService {
             }
         });
 
-        this.app.all(this.toggleSpeechEnhancementUri, async (req: Request, res: Response) => {
+        this.expressModel.app.all(this.toggleSpeechEnhancementUri, async (req: Request, res: Response) => {
             try {
                 var currentStatus = await this.device.getSpeechEnhancement();
                 var message = currentStatus ? 'Turning Speech Enhancement off' : 'Turning Speech Enhancement on';
                 await this.device.setSpeechEnhancement(!currentStatus);
                 res.status(200).send(message);
+            } catch (error: any) {
+                res.status(500).send(error.message);
+            }
+        });
+
+        this.expressModel.app.all(this.getVolumeLevelUri, async (req: Request, res: Response) => {
+            try {
+                var volume = await this.device.getVolume();
+                res.status(200).send({ volume: volume });
             } catch (error: any) {
                 res.status(500).send(error.message);
             }

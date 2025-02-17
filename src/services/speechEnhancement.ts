@@ -2,6 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { ServiceNames, DeviceEvents } from '../models/enums';
+import { SonosLogger } from '../helpers/sonosLogger';
 
 export class SpeechEnhancementService {
     private service: Service;
@@ -11,10 +12,12 @@ export class SpeechEnhancementService {
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
+        private readonly logger: SonosLogger,
         sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;
+        this.logger = logger;
 
         this.service = this.accessory.getService(this.name) || this.accessory.addService(this.platform.Service.Switch, this.name, 'Speech');
 
@@ -32,11 +35,19 @@ export class SpeechEnhancementService {
     }
 
     private handleSpeechEnhancementSet(value: CharacteristicValue) {
-        this.device.setSpeechEnhancement(value as boolean);
+        try {
+            this.device.setSpeechEnhancement(value as boolean);
+        } catch (error) {
+            this.logger.logError(`Error getting speech enhancement status: \n\n ${error}`);
+        }
     }
 
     //TODO: the characteristic value here should probably be boolean (think truthyness is helping)
     private updateCharacteristic(value: number) {
-        this.service.updateCharacteristic(this.platform.Characteristic.On, value);
+        try {
+            this.service.updateCharacteristic(this.platform.Characteristic.On, value);
+        } catch (error) {
+            this.logger.logError(`Error updating speech enhancement status: \n\n ${error}`);
+        }
     }
 }

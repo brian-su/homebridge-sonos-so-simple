@@ -2,6 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicGetCallb
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { ServiceNames } from '../models/enums';
+import { SonosLogger } from '../helpers/sonosLogger';
 
 export class MuteService {
     private service: Service | undefined;
@@ -11,10 +12,12 @@ export class MuteService {
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
+        private readonly logger: SonosLogger,
         sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;
+        this.logger = logger;
 
         this.service = this.accessory.getService(this.name) || this.accessory.addService(this.platform.Service.Switch, this.name, this.name);
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
@@ -27,7 +30,13 @@ export class MuteService {
     }
 
     private async handleMuteGet() {
-        var mute = await this.device.getMuted();
+        try {
+            var mute = await this.device.getMuted();
+        } catch (error) {
+            this.logger.logError(`Error getting mute status: \n\n ${error}`);
+            mute = false;
+        }
+
         return mute;
     }
 
