@@ -33,7 +33,13 @@ export class VolumeControlService {
         }
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
-        this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+
+        const currentName = this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+        if (currentName.value) {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(currentName.value);
+        } else {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+        }
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ServiceLabelIndex);
         this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);

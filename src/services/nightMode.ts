@@ -22,7 +22,13 @@ export class NightModeService {
         this.service = this.accessory.getService(this.name) || this.accessory.addService(this.platform.Service.Switch, this.name, 'NightMode');
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
-        this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+
+        const currentName = this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+        if (currentName.value) {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(currentName.value);
+        } else {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+        }
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ServiceLabelIndex);
         this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);

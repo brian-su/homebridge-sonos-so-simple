@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig } from 'homebridge';
 import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
@@ -14,8 +14,8 @@ import helmet from 'helmet';
  * parse the user config and discover/register accessories with Homebridge.
  */
 export class SonosPlatform implements DynamicPlatformPlugin {
-    public readonly Service: typeof Service = this.api.hap.Service;
-    public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+    public readonly Service = this.api.hap.Service;
+    public readonly Characteristic = this.api.hap.Characteristic;
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
