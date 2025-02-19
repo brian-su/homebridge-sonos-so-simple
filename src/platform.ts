@@ -84,6 +84,19 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         this.removeDevicesNotDiscovered();
 
+        if (this.accessories.length > 1 && this.expressDetails) {
+            // 404 handler
+            this.expressDetails.app.use((req, res, next) => {
+                res.status(404).send({ message: 'The route - ' + req.url + '  was not found.' });
+            });
+
+            // 500 handler
+            this.expressDetails.app.use((err, req, res, next) => {
+                this.log.error(`Error - ${req.url}: ${err.stack}`);
+                res.status(500).send({ error: err });
+            });
+        }
+
         if (this.accessories.length < 1 && this.expressDetails) {
             this.expressDetails.server.close(() => {
                 this.log.info('No devices found, shutting down open ports.');

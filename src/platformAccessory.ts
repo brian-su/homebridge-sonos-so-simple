@@ -59,18 +59,6 @@ export class SonosPlatformAccessory {
 
         if (expressModel) {
             new ApiControlService(expressModel, deviceDetails, manager, logger);
-
-            // These have to be registered after the correct routes
-            // 404 handler
-            expressModel.app.use((req, res, next) => {
-                res.status(404).send({ message: 'The route - ' + req.url + '  was not found.' });
-            });
-
-            // 500 handler
-            expressModel.app.use((err, req, res, next) => {
-                logger.logError(err.stack);
-                res.status(500).send({ error: err });
-            });
         }
 
         if (platform.config.preserveVolumeOnInputSwitch) {
