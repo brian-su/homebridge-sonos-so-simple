@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - "better-logging"
+      - "main"
 jobs:
   publish:
     runs-on: ubuntu-latest
