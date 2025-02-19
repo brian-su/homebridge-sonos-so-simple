@@ -1,3 +1,6 @@
+import { Express } from 'express';
+import { Server } from 'http';
+
 export type FoundDevices = {
     uuid: string;
     name: string;
@@ -21,4 +24,9 @@ export type DeviceDetails = {
 export type AudioInputModel = {
     InputUri: string;
     Volume: number;
+};
+
+export type ExpressModel = {
+    app: Express;
+    server: Server;
 };

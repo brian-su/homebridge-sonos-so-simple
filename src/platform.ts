@@ -1,11 +1,11 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig } from 'homebridge';
 import { BREAKING_CHANGE_PACKAGE_VERSION, PLATFORM_NAME, PLUGIN_NAME, SOUNDBAR_NAMES, DEFAULT_EXPRESS_PORT } from './models/constants';
 import { SonosPlatformAccessory } from './platformAccessory';
 import { AsyncDeviceDiscovery } from 'sonos';
 import { Device } from './models/sonos-types';
-import express, { Express } from 'express';
+import express from 'express';
 import detect from 'detect-port';
-import { FoundDevices, DeviceDetails, AudioInputModel } from './models/models';
+import { FoundDevices, DeviceDetails, AudioInputModel, ExpressModel } from './models/models';
 import helmet from 'helmet';
 
 /**
@@ -14,14 +14,14 @@ import helmet from 'helmet';
  * parse the user config and discover/register accessories with Homebridge.
  */
 export class SonosPlatform implements DynamicPlatformPlugin {
-    public readonly Service: typeof Service = this.api.hap.Service;
-    public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+    public readonly Service = this.api.hap.Service;
+    public readonly Characteristic = this.api.hap.Characteristic;
     // this is used to track restored cached accessories
     public readonly accessories: PlatformAccessory[] = [];
 
     private foundDevices: FoundDevices[] = [];
     private coordinators: string[] = [];
-    private expressApp: Express | null = null;
+    private expressDetails: ExpressModel | null = null;
     private expressAppPort: number | undefined;
 
     constructor(
@@ -69,7 +69,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
 
         if (this.config.volumeControlEndpoints) {
             try {
-                this.expressApp = await this.setupExpressApp();
+                this.expressDetails = await this.setupExpressApp();
             } catch (error: any) {
                 this.log.error(error.message);
                 return;
@@ -83,6 +83,25 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         }
 
         this.removeDevicesNotDiscovered();
+
+        if (this.accessories.length > 1 && this.expressDetails) {
+            // 404 handler
+            this.expressDetails.app.use((req, res, next) => {
+                res.status(404).send({ message: 'The route - ' + req.url + '  was not found.' });
+            });
+
+            // 500 handler
+            this.expressDetails.app.use((err, req, res, next) => {
+                this.log.error(`Error - ${req.url}: ${err.stack}`);
+                res.status(500).send({ error: err });
+            });
+        }
+
+        if (this.accessories.length < 1 && this.expressDetails) {
+            this.expressDetails.server.close(() => {
+                this.log.info('No devices found, shutting down open ports.');
+            });
+        }
     }
 
     async registerDiscoveredDevices(device: Device) {
@@ -121,7 +140,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
             existingAccessory.displayName = deviceDisplayName;
             deviceDetailsModel.AudioInputVolumes = existingAccessory.context.device.AudioInputVolumes;
             existingAccessory.context.device = deviceDetailsModel;
-            new SonosPlatformAccessory(this, existingAccessory, this.expressApp);
+            new SonosPlatformAccessory(this, existingAccessory, this.expressDetails);
 
             this.log.debug(`EXISTING DEVICE DETAILS: ${JSON.stringify(existingAccessory.context.device.AudioInputVolumes)}`);
 
@@ -132,7 +151,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.log.info(`Adding ${description.roomName} ${description.displayName} as new device`);
         const accessory = new this.api.platformAccessory(deviceDisplayName, uuid);
         accessory.context.device = deviceDetailsModel;
-        new SonosPlatformAccessory(this, accessory, this.expressApp);
+        new SonosPlatformAccessory(this, accessory, this.expressDetails);
 
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     }
@@ -155,7 +174,7 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, removedAccessories);
     }
 
-    private async setupExpressApp(): Promise<Express> {
+    private async setupExpressApp(): Promise<ExpressModel> {
         this.log.info('Setting up Express server');
         var targetPort = DEFAULT_EXPRESS_PORT;
         var actualPort = 0;
@@ -173,14 +192,24 @@ export class SonosPlatform implements DynamicPlatformPlugin {
         }
 
         var app = express();
-        app.listen(actualPort, () => {
-            this.log.info(`Volume endpoints are now listening on port ${actualPort}`);
+        var server = app.listen(actualPort, () => {
+            var address: string = '';
+            var addressInfo = server.address();
+
+            if (typeof addressInfo === 'string') {
+                address = addressInfo;
+            } else if (addressInfo && addressInfo.address) {
+                address = JSON.stringify(addressInfo);
+            }
+
+            this.log.info(`Sonos Device Control endpoints are now listening on port ${actualPort} at ${address}`);
         });
+
         app.use(helmet());
 
         this.expressAppPort = actualPort;
 
-        return app;
+        return { app: app, server: server };
     }
 
     private updateInputVolumeLevels(uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) {

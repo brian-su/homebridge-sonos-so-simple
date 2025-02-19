@@ -3,6 +3,7 @@ import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/Chara
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { ServiceNames, VolumeOptions, DeviceEvents } from '../models/enums';
+import { SonosLogger } from '../helpers/sonosLogger';
 
 export class VolumeControlService {
     private readonly device: SonosDeviceManager;
@@ -13,10 +14,12 @@ export class VolumeControlService {
     constructor(
         private readonly platform: SonosPlatform,
         private readonly accessory: PlatformAccessory,
+        private readonly logger: SonosLogger,
         sonosDevice: SonosDeviceManager,
         displayOrder: number
     ) {
         this.device = sonosDevice;
+        this.logger = logger;
 
         //Volume controls could change so check to see if that they haven't
         let currentVolumeService = this.accessory.getService(this.name);
@@ -30,7 +33,13 @@ export class VolumeControlService {
         }
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ConfiguredName);
-        this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+
+        const currentName = this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+        if (currentName.value) {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(currentName.value);
+        } else {
+            this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).setValue(this.name);
+        }
 
         this.service.addOptionalCharacteristic(this.platform.Characteristic.ServiceLabelIndex);
         this.service.getCharacteristic(this.platform.Characteristic.ServiceLabelIndex).setValue(displayOrder);
@@ -67,7 +76,13 @@ export class VolumeControlService {
     }
 
     private async handleMuteGet() {
-        let mute = await this.device.getMuted();
+        try {
+            var mute = await this.device.getMuted();
+        } catch (error) {
+            this.logger.logError(`Error getting mute status for volume control: \n\n ${error}`);
+            mute = true;
+        }
+
         return !mute;
     }
 

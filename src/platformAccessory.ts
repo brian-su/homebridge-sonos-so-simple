@@ -7,16 +7,15 @@ import { MuteService } from './services/mute';
 import { SpeechEnhancementService } from './services/speechEnhancement';
 import { NightModeService } from './services/nightMode';
 import { SonosLogger } from './helpers/sonosLogger';
-import { Express } from 'express';
 import { ApiControlService } from './services/apiControl';
 import { VolumeOptions, ServiceNames } from './models/enums';
-import { DeviceDetails } from './models/models';
+import { DeviceDetails, ExpressModel } from './models/models';
 import { AudioSwitchService } from './services/audioSwitch';
 
 export class SonosPlatformAccessory {
     private readonly accessory: PlatformAccessory;
 
-    constructor(platform: SonosPlatform, accessory: PlatformAccessory, expressApp: Express | null) {
+    constructor(platform: SonosPlatform, accessory: PlatformAccessory, expressModel: ExpressModel | null) {
         this.accessory = accessory;
         const deviceDetails = accessory.context.device as DeviceDetails;
         const sonosDevice = new Sonos(deviceDetails.Host);
@@ -35,42 +34,31 @@ export class SonosPlatformAccessory {
         let displayOrder = 1;
 
         if (platform.config.volume !== VolumeOptions.None) {
-            new VolumeControlService(platform, accessory, manager, displayOrder++);
+            new VolumeControlService(platform, accessory, logger, manager, displayOrder++);
         } else {
             this.removeOldService(ServiceNames.VolumeService);
         }
 
         if (platform.config.muteSwitch) {
-            new MuteService(platform, accessory, manager, displayOrder++);
+            new MuteService(platform, accessory, logger, manager, displayOrder++);
         } else {
             this.removeOldService(ServiceNames.MuteService);
         }
 
         if (deviceDetails.IsSoundBar) {
-            new SpeechEnhancementService(platform, accessory, manager, displayOrder++);
+            new SpeechEnhancementService(platform, accessory, logger, manager, displayOrder++);
         } else {
             this.removeOldService(ServiceNames.SpeechEnhancementService);
         }
 
         if (deviceDetails.IsSoundBar) {
-            new NightModeService(platform, accessory, manager, displayOrder++);
+            new NightModeService(platform, accessory, logger, manager, displayOrder++);
         } else {
             this.removeOldService(ServiceNames.NightModeService);
         }
 
-        if (expressApp) {
-            new ApiControlService(expressApp, deviceDetails, manager, logger);
-
-            // These have to be registered after the correct routes
-            // 404 handler
-            expressApp.use((req, res, next) => {
-                return res.status(404).send({ message: 'The route - ' + req.url + '  was not found.' });
-            });
-
-            // 500 handler
-            expressApp.use((err, req, res, next) => {
-                return res.status(500).send({ error: err });
-            });
+        if (expressModel) {
+            new ApiControlService(expressModel, deviceDetails, manager, logger);
         }
 
         if (platform.config.preserveVolumeOnInputSwitch) {
