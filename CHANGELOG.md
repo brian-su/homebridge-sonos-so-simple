@@ -2,20 +2,34 @@
 
 Changes to the repo are noted here:
 
+## 0.5.4 - 2025-02-19
+
+### Features:
+
+- Marking plugin as v2 supported
+- Betting logging for debugging
+
+### Bug Fixes:
+
+- Stop resetting device names each time homebridge restarts
+- Fix for device control endpoints where they only setup for the first device, now works for all devices in the network
+
+Big thanks to DanSmith888 for raising these two bugs and helping to debug through them!
+
 ## 0.5.2 - 2024-11-12
 
--   Adding support for the new Arc Ultra. Thanks to Matt17000 for the update.
+- Adding support for the new Arc Ultra. Thanks to Matt17000 for the update.
 
 ## 0.5.1 - 2023-11-27
 
--   Bug fix to the package deployment
+- Bug fix to the package deployment
 
 ## 0.5.0 - 2023-11-27
 
 ### Features:
 
--   Adding support for Playbase as a soundbar.
--   Adds to the volume control endpoints feature to add mute, night mode and speech enhancement toggling via API endpoints, locally from within your network. See the [documentation](https://github.com/brian-su/homebridge-sonos-so-simple#rest-control-endpoints) for more info.
+- Adding support for Playbase as a soundbar.
+- Adds to the volume control endpoints feature to add mute, night mode and speech enhancement toggling via API endpoints, locally from within your network. See the [documentation](https://github.com/brian-su/homebridge-sonos-so-simple#rest-control-endpoints) for more info.
 
 ## 0.4.0 - 2023-04-01
 
