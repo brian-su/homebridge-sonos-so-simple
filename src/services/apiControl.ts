@@ -110,10 +110,6 @@ export class ApiControlService {
         });
 
         this.expressModel.app.use(`${this.deviceUri}`, router);
-
-        try {
-            this.logger.logInfo(this.expressModel.app._router.stack);
-        } catch {}
     }
 
     private logEndpointUris() {
