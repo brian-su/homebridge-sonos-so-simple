@@ -1,0 +1,29 @@
+{
+    "bridge": {
+        "name": "PluginTemplate",
+        "username": "AA:BB:CC:DD:EE:FF",
+        "port": 9999,
+        "pin": "031-45-154"
+    },
+    "description": "HomeBridge HTTP Status Control",
+    "plugins": ["homebridge-config-ui-x"],
+    "platforms": [
+        {
+            "name": "Config",
+            "port": 8888,
+            "auth": "none",
+            "theme": "blue",
+            "tempUnits": "c",
+            "lang": "auto",
+            "sudo": false,
+            "standalone": true,
+            "platform": "config",
+            "debug": true,
+            "log": {
+                "method": "systemd",
+                "service": "homebridge@1"
+            }
+        }
+    ],
+    "accessories": []
+}

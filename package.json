@@ -2,8 +2,10 @@
     "displayName": "Sonos So Simple",
     "name": "homebridge-sonos-so-simple",
     "version": "0.5.4",
-    "description": "A very simple plugin for controlling Sonos devices via Homebridge.",
+    "description": "No-nonsense HomeKit integration for Sonos devices. Control volume, night mode, and speech enhancement without complexity.",
+    "author": "Brian Surgenor",
     "license": "MIT",
+    "homepage": "https://github.com/brian-su/homebridge-sonos-so-simple#readme",
     "repository": {
         "type": "git",
         "url": "git://github.com/brian-su/homebridge-sonos-so-simple.git"
@@ -21,12 +23,12 @@
         "watch": "npm run build && npm link && nodemon",
         "build": "rimraf ./dist && tsc",
         "prepublishOnly": "npm run build",
-        "localDev": "npm run build && npm link && homebridge -D -I",
-        "trackDev": "npm run watch",
         "prepare": "husky install"
     },
     "keywords": [
-        "homebridge-plugin"
+        "homebridge-plugin",
+        "homebridge",
+        "sonos"
     ],
     "dependencies": {
         "detect-port": "^1.5.1",

@@ -122,3 +122,7 @@ dist
 
 .vscode
 .DS_Store
+
+test/hbConfig/*
+!test/hbConfig/auth.json
+!test/hbConfig/config.json
