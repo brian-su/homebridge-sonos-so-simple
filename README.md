@@ -5,83 +5,57 @@
 
 # Homebridge Sonos So Simple
 
-## What does it do?
+## Simple Sonos controls through HomeKit 🔊
 
-If, like me, you've bought a Sonos soundbar (Beam/Arc) and just want to expose a few settings to Homekit to control via Siri then this is the package for you!
+Want basic Sonos controls in HomeKit? This plugin gives you volume, mute, speech enhancement and night mode controls without any faff.
 
-This package gives you options to control the volume, mute, speech enhancement and night mode via Homebridge with very little config setup.
+## Quick setup
 
-## Example Configuration
-
-```
-    "platforms": [
-        ...
-        {
-            "muteSwitch": true, //with this to false there will be no mute switch, you will only be able to toggle volume by turning the volume off
-            "soundbarsOnly": false, //if you only want to expose your TV soundbar, and not sonos speakers in another room, set this to true
-            "roomNameAsName": false, //setting this to false will take the master device name instead; e.g. Beam
-            "volume": "fan", //Options here are bulb/fan/none
-            "platform": "SonosSoSimplePlatform",
-            "volumeControlEndpoints": false //Really only if you want some volume endpoint madness, see section below
-        }
-        ...
-    ]
+```json
+"platforms": [
+    {
+        "platform": "SonosSoSimplePlatform",
+        "muteSwitch": true,           // Set false to remove mute switch
+        "soundbarsOnly": false,        // Set true to show only TV soundbars
+        "roomNameAsName": false,       // False uses device name (e.g. "Beam") instead of room name
+        "volume": "fan",              // Options: bulb/fan/none
+        "volumeControlEndpoints": false // Enable REST endpoints for volume control
+    }
+]
 ```
 
 ## Installation
 
-Either search via the Homebridge config for homebridge-sonos-so-simple
+Either:
 
-```
-npm install homebridge-sonos-so-simple -g
-```
+1. Search for "homebridge-sonos-so-simple" in Homebridge config UI
+2. Or run:
 
-Once installed update the config, again using the config ui or using the example config above.
-
-## REST Control Endpoints
-
-As of version 0.3.0 the plugin can offer api endpoints to allow you to hook up shortcuts and or buttons to trigger the volume up and down. And as of 0.5.0, toggle device settings like mute, night mode and speech enhancement. By default this feature is turned off in the config.
-
-Once the featured is toggled on the plugin will open up a port on the Homebridge server and offer the endpoints for each discovered Sonos zone.
-
-Eg:
-
-```
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-up
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-down
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-mute
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-night-mode
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/toggle-speech-enhancement
+```bash
+npm install -g --omit=dev homebridge-sonos-so-simple
 ```
 
-To create a shortcut in the shortcuts app, pick the "Get Contents of URL" option, type the url in and voila!
+## REST Control (Optional)
 
-**The actual port it opened & the URIs it generated will be outputted into the logs so have a look and grab yours from there.**
-
-By default the endpoint will increment/decrement the volume in steps of 2 but you can change this by adding a value param to the URL.
-
-Eg:
+Enable `volumeControlEndpoints` to control your Sonos via HTTP requests:
 
 ```
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-up?value=10
-{{HOMEBRIDGE_ADDRESS}}:3000/LivingRoom/Beam/volume-down?value=5
+http://YOUR_HOMEBRIDGE:3000/LivingRoom/Beam/volume-up
+http://YOUR_HOMEBRIDGE:3000/LivingRoom/Beam/volume-down
+http://YOUR_HOMEBRIDGE:3000/LivingRoom/Beam/toggle-mute
+http://YOUR_HOMEBRIDGE:3000/LivingRoom/Beam/toggle-night-mode
+http://YOUR_HOMEBRIDGE:3000/LivingRoom/Beam/toggle-speech-enhancement
 ```
 
-You can make the request using any HTTP verb you want. GET/PUT/POST, pick whatever your heart desires. Technically it should be a PUT but I can't be bothered restricting it in case it causes someone a problem.
+Adjust volume steps with `?value=10` parameter, without this default functionality is up/down by 2. Works with any HTTP method (GET/POST/PUT).
 
-### Plugin Notes & Caveats:
+## Important notes
 
-The Home app doesn't play nicely with speakers, or properly support most of what HomeKit offers. So to get around this you'll be offered the option to treat the volume control as a fan or a lightbulb. The goal being that you can still say 'Hey Siri, set my Beam to 20%' or have a movie scene that cranks the volume up and turns speech enhancement on.
-Choosing to treat the volume as a lightbulb will cause the volume to mute if you issue commands to turn all the lights off to Siri.
+- Volume shows as either a fan or light in HomeKit (as HomeKit lacks speaker controls)
+- Choose "bulb" with caution - "turn off all lights" will mute your Sonos
+- REST endpoints typically use port 3000, but may change if port is busy
+    - Please open an issue if the port is continually changing/causing issues.
 
-The port number for the volume endpoints _could_ change when Homebridge is restarted, but I think this is unlikely. Essentially the plugin will try to grab port 3000, but if it can't it will try to grab the next available port.
-There is a chance that a previous setup will output a port number but then after restarting Homebridge that port will be taken. So in this case the plugin will grab another port instead.
+## Credit
 
-I could mitigate this by asking users to pick a port for themselves and then have it in the config and handle the error if the port is in use but I think that adds complexity that sort of ruins the name of "sonos-**so-simple**". If the port changing is becoming a problem for you open up a ticket on the issues tab and I'll have a look at it.
-
-Finally, I'm fairly certain that the Volume Endpoints feature is an utterly stupid implementation in this instance, but I came across Avi Millers neat idea and thought it might suit.
-So if you have a firmer understanding of Homebridge and know of a better way please open up a ticket in the issues tab and let me know.
-
-## References
-
-Thanks to Avi Miller and his [repo](https://github.com/djelibeybi/homebridge-button-platform) for the idea for implementing the Volume Endpoints feature.
+Cheers to Avi Miller for the REST endpoints inspiration!
