@@ -45,7 +45,7 @@
         "husky": "^8.0.2",
         "nodemon": "^3.0.3",
         "prettier": "^3.3.3",
-        "rimraf": "^5.0.0",
+        "rimraf": "^6.0.1",
         "ts-node": "^10.9.1",
         "typescript": "^5.0.4"
     },
