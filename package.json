@@ -31,7 +31,7 @@
         "sonos"
     ],
     "dependencies": {
-        "detect-port": "^1.5.1",
+        "detect-port": "^2.1.0",
         "express": "^5.0.0",
         "helmet": "^8.0.0",
         "sonos": "^1.14.1"
