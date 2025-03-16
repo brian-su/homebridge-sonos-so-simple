@@ -1,5 +1,4 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { RotationSpeed, Brightness } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 import { SonosPlatform } from '../platform';
 import { SonosDeviceManager } from '../helpers/sonosDeviceManager';
 import { ServiceNames, VolumeOptions, DeviceEvents } from '../models/enums';
@@ -9,7 +8,7 @@ export class VolumeControlService {
     private readonly device: SonosDeviceManager;
     private service!: Service;
     private name: string = ServiceNames.VolumeService;
-    private volumeCharacteristic!: typeof RotationSpeed | typeof Brightness;
+    private volumeCharacteristic: any;
 
     constructor(
         private readonly platform: SonosPlatform,
@@ -46,7 +45,7 @@ export class VolumeControlService {
 
         this.service.getCharacteristic(this.platform.Characteristic.On).onGet(this.handleMuteGet.bind(this)).onSet(this.handleMuteSet.bind(this));
 
-        this.service.getCharacteristic(this.volumeCharacteristic!).onSet(this.handleVolumeSet.bind(this));
+        this.service.getCharacteristic(this.volumeCharacteristic).onSet(this.handleVolumeSet.bind(this));
 
         this.device.on(DeviceEvents.DeviceVolumeUpdate, (volume: number) => {
             this.updateCharacteristic(volume);
@@ -95,6 +94,6 @@ export class VolumeControlService {
     }
 
     private updateCharacteristic(volume: number) {
-        this.service!.updateCharacteristic(this.volumeCharacteristic!, volume);
+        this.service!.updateCharacteristic(this.volumeCharacteristic, volume);
     }
 }

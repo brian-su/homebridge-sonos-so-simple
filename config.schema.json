@@ -20,6 +20,29 @@
                 "type": "boolean",
                 "default": false
             },
+            "groupDiscoveryMode": {
+                "title": "Sonos Group Discovery Mode",
+                "type": "string",
+                "default": "auto",
+                "oneOf": [
+                    { "title": "Auto - Smart Group Detection", "enum": ["auto"] },
+                    { "title": "Individual Devices Only", "enum": ["individual"] },
+                    { "title": "Groups Only", "enum": ["groups"] },
+                    { "title": "Both Individual Devices and Groups", "enum": ["both"] }
+                ],
+                "required": true
+            },
+            "groupNamingFormat": {
+                "title": "Format for Group Names",
+                "type": "string",
+                "default": "coordinator_plus",
+                "oneOf": [
+                    { "title": "Coordinator Room with Count (Living Room (2))", "enum": ["coordinator_plus"] },
+                    { "title": "Group Members (Living Room, Kitchen, Office)", "enum": ["members_list"] },
+                    { "title": "Simple Group Name (Sonos Group Living Room)", "enum": ["simple"] }
+                ],
+                "required": true
+            },
             "volume": {
                 "title": "Volume Options",
                 "type": "string",

@@ -19,6 +19,12 @@ export type DeviceDetails = {
     ExpressAppPort: number;
     AudioInputVolumes: AudioInputModel[];
     UpdateAudioVolumes: (uuid: string, currentSettings: AudioInputModel, currentSavedSettings: AudioInputModel[]) => void;
+    IsGroup?: boolean;
+    IsCoordinator?: boolean;
+    IsHomeTheater?: boolean;
+    GroupID?: string;
+    GroupName?: string;
+    GroupMembers?: string[];
 };
 
 export type AudioInputModel = {

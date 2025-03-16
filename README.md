@@ -59,3 +59,28 @@ Adjust volume steps with `?value=10` parameter, without this default functionali
 ## Credit
 
 Cheers to Avi Miller for the REST endpoints inspiration!
+
+## Configuration
+
+This plugin is configured through the Homebridge user interface or by editing the config.json file directly.
+
+### Options
+
+- **Separate Switch For Mute**: Creates a separate switch to control mute. (Default: true)
+- **Only offer controls for soundbars**: Restricts the plugin to only control Sonos soundbars (Beam, Arc, Playbar, Ray). (Default: false)
+- **Use the room name as the device name**: Uses the Sonos room name as the HomeKit device name. (Default: false)
+- **Sonos Group Discovery Mode**: Controls how Sonos groups are discovered and presented in HomeKit. (Default: auto)
+  - **Auto - Smart Group Detection**: Only shows groups with multiple devices
+  - **Individual Devices Only**: Only shows individual Sonos devices, regardless of grouping
+  - **Groups Only**: Only shows Sonos groups
+  - **Both Individual Devices and Groups**: Shows both individual devices and their groups
+- **Format for Group Names**: Controls how group names are displayed. (Default: coordinator_plus)
+  - **Coordinator Room with Count**: Shows format like "Living Room (2)"
+  - **Group Members**: Shows all members like "Living Room, Kitchen, Office"
+  - **Simple Group Name**: Shows a simple format like "Sonos Group Living Room"
+- **Volume Options**: Choose how to control volume. (Default: none)
+  - **None**: No volume control
+  - **Lightbulb**: Use a lightbulb control for volume
+  - **Fan**: Use a fan control for volume
+- **Offer API endpoints to control your devices**: Creates HTTP endpoints for external control. (Default: false)
+- **Preserve volume for each input**: Remembers separate volume levels for different inputs. (Default: false)
